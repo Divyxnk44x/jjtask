@@ -1,0 +1,118 @@
+"$schema" = "https://jj-vcs.github.io/jj/latest/config-schema.json"
+
+# jjtask base config
+# Install: symlink to ~/.config/jj/conf.d/10-jjtask.toml
+
+[colors]
+hint = { fg = "bright black" }
+
+# Task status colors
+"task done" = "green"
+"task todo" = "yellow"
+"task wip" = "cyan"
+"task blocked" = "red"
+"task standby" = { fg = "bright black" }
+"task draft" = { fg = "bright black", italic = true }
+"task untested" = "magenta"
+"task review" = "blue"
+
+[revset-aliases]
+"tasks()" = 'ancestors(@, 200):: & description(substring:"[task:")'
+"tasks_pending()" = 'tasks() & ~description(substring:"[task:done]")'
+"tasks_todo()" = 'tasks() & description(substring:"[task:todo]")'
+"tasks_wip()" = 'tasks() & description(substring:"[task:wip]")'
+"tasks_done()" = 'tasks() & description(substring:"[task:done]")'
+"tasks_blocked()" = 'tasks() & description(substring:"[task:blocked]")'
+"tasks_standby()" = 'tasks() & description(substring:"[task:standby]")'
+"tasks_untested()" = 'tasks() & description(substring:"[task:untested]")'
+"tasks_draft()" = 'tasks() & description(substring:"[task:draft]")'
+"tasks_review()" = 'tasks() & description(substring:"[task:review]")'
+"tasks_ready()" = 'tasks_todo() ~ children(tasks_pending() ~ tasks_todo())'
+"tasks_stale()" = 'tasks_pending() ~ (::@)'
+"tasks_next()" = 'heads(tasks_ready() & children(::@))'
+
+[template-aliases]
+'task_flag' = '''
+if(description.starts_with("[task:draft]"), "draft",
+if(description.starts_with("[task:todo]"), "todo",
+if(description.starts_with("[task:wip]"), "wip",
+if(description.starts_with("[task:blocked]"), "blocked",
+if(description.starts_with("[task:standby]"), "standby",
+if(description.starts_with("[task:untested]"), "untested",
+if(description.starts_with("[task:review]"), "review",
+if(description.starts_with("[task:done]"), "done",
+""))))))))
+'''
+
+'task_title' = '''
+if(description.starts_with("[task:"),
+  description.first_line().remove_prefix("[task:" ++ task_flag ++ "] "),
+  description.first_line()
+)
+'''
+
+'task_body_content' = 'description.remove_prefix(description.first_line() ++ "\n").split("\n", 6).filter(|l| !l.starts_with("#") && l.len() > 0)'
+'task_body' = 'task_body_content.join(" ")'
+
+'task_oneline' = '''
+separate(" ",
+  if(description.starts_with("[task:"), label("task " ++ task_flag, "[task:" ++ task_flag ++ "]"), ""),
+  format_short_change_id(change_id),
+  task_title,
+) ++ "\n"
+'''
+
+'desc_lines' = 'description.trim().lines().len()'
+'has_spec' = 'desc_lines > 3 && description.starts_with("[task:")'
+'desc_more_text' = '"+" ++ desc_lines ++ "L"'
+
+'parent_ids' = 'parents.map(|p| p.change_id().shortest()).join(",")'
+
+'task_log' = '''
+if(root,
+  format_root_commit(self),
+  label(if(current_working_copy, "working_copy"),
+    concat(
+      separate(" ",
+        format_short_change_id(change_id),
+        if(description.starts_with("[task:"), label("task " ++ task_flag, "[task:" ++ task_flag ++ "]"), ""),
+        task_title,
+      ),
+      if(has_spec, " " ++ label("hint", desc_more_text), ""),
+      "\n",
+      if(description.starts_with("[task:") && task_body_content.len() > 0,
+        "   " ++ truncate_end(120, task_body, "...") ++ "\n",
+        ""
+      ),
+      if(current_working_copy && !empty, diff.stat(80) ++ "\n", ""),
+    ),
+  )
+)
+'''
+
+'task_log_flat' = '''
+if(root,
+  "",
+  concat(
+    separate(" ",
+      format_short_change_id(change_id),
+      "(" ++ parent_ids ++ ")",
+      if(description.starts_with("[task:"), label("task " ++ task_flag, "[task:" ++ task_flag ++ "]"), ""),
+      task_title,
+    ),
+    if(has_spec, " " ++ label("hint", desc_more_text), ""),
+    "\n",
+    if(description.starts_with("[task:") && task_body_content.len() > 0,
+      "   " ++ truncate_end(120, task_body, "...") ++ "\n",
+      ""
+    ),
+  )
+)
+'''
+
+'task_minimal' = '''
+format_short_change_id(change_id) ++ " " ++ label("task " ++ task_flag, "[task:" ++ task_flag ++ "]") ++ " " ++ task_title ++ "\n"
+'''
+
+[aliases]
+task = ["util", "exec", "--", "jjtask"]

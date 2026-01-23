@@ -1,0 +1,125 @@
+#!/bin/bash
+# jj wrapper with agent guardrails
+# Blocks bad patterns, shows hints for jjtask-* commands
+
+# Enable colors if stdout is a TTY (overrides agent.toml's color=never)
+if [[ -t 1 ]]; then
+    JJ_TTY_ARGS=(--color=always)
+else
+    JJ_TTY_ARGS=()
+fi
+
+# Find real jj binary (skip this wrapper and symlinks to it)
+JJ=""
+SELF_REAL="$(realpath "$0" 2>/dev/null || echo "$0")"
+for p in $(echo "$PATH" | tr ':' '\n'); do
+    if [[ -x "$p/jj" ]]; then
+        candidate_real="$(realpath "$p/jj" 2>/dev/null || echo "$p/jj")"
+        if [[ "$candidate_real" != "$SELF_REAL" ]]; then
+            JJ="$p/jj"
+            break
+        fi
+    fi
+done
+if [[ -z "$JJ" ]]; then
+    echo "Error: Could not find jj binary in PATH" >&2
+    exit 1
+fi
+
+SESSION_ID="${X_CLAUDE_SESSION_ID:-$$}"
+
+hint_shown() {
+    [[ -f "/tmp/.jj_hint_${SESSION_ID}_$1" ]]
+}
+
+mark_hint() {
+    touch "/tmp/.jj_hint_${SESSION_ID}_$1"
+}
+
+show_hint() {
+    [[ -n "${JJ_NO_HINTS:-}" ]] && return
+    if ! hint_shown "$1"; then
+        mark_hint "$1"
+        shift
+        echo "$@" >&2
+    fi
+}
+
+jj_exec() {
+    exec "$JJ" ${JJ_TTY_ARGS[@]+"${JJ_TTY_ARGS[@]}"} "$@"
+}
+
+if [[ $# -eq 0 ]]; then
+    [[ -f .jj-workspaces.yaml ]] && show_hint logall "AGENT HINT: For multi-repo: jjtask all log"
+    jj_exec
+fi
+
+case "$1" in
+    log)
+        for arg in "$@"; do
+            case "$arg" in
+                *glob:*\[*|*glob:*task*|*description*glob*task*)
+                    echo "BLOCKED (exit 1): Bad glob - brackets [] are character classes" >&2
+                    echo "  Use: description(substring:\"[task:\")" >&2
+                    echo "  Or alias: tasks(), tasks_pending()" >&2
+                    exit 1
+                    ;;
+                *\[task:*)
+                    echo "BLOCKED (exit 1): Raw [task: in revset won't work" >&2
+                    echo "  Use: description(substring:\"[task:\")" >&2
+                    echo "  Or revset aliases:" >&2
+                    echo "    tasks()         tasks_pending()   tasks_ready()" >&2
+                    echo "    tasks_todo()    tasks_wip()       tasks_done()" >&2
+                    echo "    tasks_blocked() tasks_draft()     tasks_review()" >&2
+                    echo "    tasks_stale()   tasks_next()" >&2
+                    exit 1
+                    ;;
+            esac
+        done
+        [[ -f .jj-workspaces.yaml ]] && show_hint logall "AGENT HINT: For multi-repo: jjtask all log"
+        has_limit=0
+        for arg in "$@"; do
+            case "$arg" in
+                --limit=*|-l|--limit|-n|-n[0-9]*)
+                    has_limit=1
+                    ;;
+            esac
+        done
+        if [[ $has_limit -eq 0 ]]; then
+            shift
+            jj_exec log --limit=15 "$@"
+        fi
+        ;;
+    show)
+        show_hint show "AGENT HINT: For description only: jjtask show-desc [REV]"
+        ;;
+    describe|desc)
+        show_hint desc "AGENT HINT: Description patterns:" \
+            $'\n'"  jjtask flag REV FLAG           # status only" \
+            $'\n'"  jjtask desc-transform REV SED  # partial edit via sed" \
+            $'\n'"  jj desc -r REV -m \"\$(jjtask show-desc REV)...\"  # append to desc"
+        ;;
+    new)
+        if [[ -z "${JJ_ALLOW_TASK:-}" ]]; then
+            for arg in "$@"; do
+                case "$arg" in
+                    *task:*)
+                        echo "BLOCKED (exit 1): Use jjtask create for task revisions:" >&2
+                        echo "  jjtask create TITLE              # parent=@" >&2
+                        echo "  jjtask create PARENT TITLE DESC  # explicit parent" >&2
+                        echo "  jjtask parallel PARENT T1 T2     # multiple siblings" >&2
+                        exit 1
+                        ;;
+                esac
+            done
+        fi
+        ;;
+    rebase)
+        show_hint rebase "AGENT HINT: For hoisting pending tasks to @: jjtask hoist"
+        ;;
+    edit)
+        show_hint edit "AGENT HINT: For task transitions: jjtask next --mark-as STATUS REV"
+        ;;
+esac
+
+jj_exec "$@"

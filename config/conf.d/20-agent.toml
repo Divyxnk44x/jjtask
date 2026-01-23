@@ -1,0 +1,34 @@
+"$schema" = "https://jj-vcs.github.io/jj/latest/config-schema.json"
+
+# Agent overrides (loaded after 10-jjtask.toml)
+
+[ui]
+color = "never"
+default-command = "log"
+editor = "TRIED_TO_RUN_AN_INTERACTIVE_EDITOR"
+diff-formatter = ":git"
+log-word-wrap = false
+
+[templates]
+log = '''
+if(root,
+  format_root_commit(self),
+  label(if(current_working_copy, "working_copy"),
+    concat(
+      separate(" ",
+        format_short_change_id(change_id),
+        if(empty, label("empty", "(empty)")),
+        if(description, description.first_line(), description_placeholder),
+        bookmarks,
+      ),
+      if(has_spec, " " ++ label("hint", desc_more_text), ""),
+      "\n",
+      if(description.starts_with("[task:") && task_body_content.len() > 0,
+        "   " ++ truncate_end(120, task_body, "...") ++ "\n",
+        ""
+      ),
+      if(current_working_copy && !empty, diff.stat(80) ++ "\n", ""),
+    ),
+  )
+)
+'''

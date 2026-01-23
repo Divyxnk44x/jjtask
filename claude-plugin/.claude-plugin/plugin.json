@@ -1,0 +1,48 @@
+{
+  "name": "jjtask",
+  "description": "Structured task management using JJ (Jujutsu). Uses empty revisions as TODO markers with [task:*] flags, forming a DAG of plannable and executable tasks.",
+  "version": "0.1.1",
+  "author": {
+    "name": "Alexander Ryzhikov",
+    "url": "https://github.com/coobaha"
+  },
+  "repository": "https://github.com/coobaha/jjtask",
+  "license": "MIT",
+  "homepage": "https://github.com/coobaha/jjtask",
+  "keywords": [
+    "task-management",
+    "jujutsu",
+    "jj",
+    "version-control",
+    "ai-workflow",
+    "todo",
+    "dag",
+    "parallel-agents"
+  ],
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/bin/jjtask prime",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/bin/jjtask prime",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

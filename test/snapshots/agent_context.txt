@@ -1,0 +1,11 @@
+## Agent Context: agent-a
+
+Mode: shared
+
+### Parent Task
+ID [task:todo] Parent task
+
+### DAG State
+@  ← ID [task:todo] Parent task
+│
+~

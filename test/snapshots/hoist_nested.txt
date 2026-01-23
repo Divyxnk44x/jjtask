@@ -1,0 +1,9 @@
+Found 1 task root(s) to hoist: ID
+Rebased 2 commits to destination
+Done
+---
+○  ID [task:todo] Child task
+○  ID [task:todo] Parent task
+@  ID New work
+│
+~

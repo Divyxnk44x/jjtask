@@ -24,7 +24,6 @@ download_binary() {
   asset="jjtask-${os}-${arch}.tar.gz"
   local tmp
   tmp="$(mktemp -d)"
-  trap "rm -rf '$tmp'" EXIT
 
   # Try gh CLI first (works with private repos)
   if command -v gh &>/dev/null; then

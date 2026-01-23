@@ -1,0 +1,17 @@
+cwd: TMPDIR | repo: TMPDIR | workspace: ../..
+
+=== root: jj -R ../.. log ===
+@  ID
+│
+~
+
+=== frontend: jj -R .. log ===
+○  ID [task:todo] Frontend task
+@  ID
+│
+~
+
+=== backend: jj -R ../../backend log ===
+@  ID
+│
+~

@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: jdx/mise-action@v3
+
+      - name: Build
+        run: mise run build
+
+      - name: Check binary size
+        run: |
+          size=$(stat -c%s bin/jjtask-go)
+          echo "Binary size: $((size / 1024 / 1024))MB ($size bytes)"
+          if [ $size -gt 10485760 ]; then
+            echo "Binary exceeds 10MB limit"
+            exit 1
+          fi
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: jdx/mise-action@v3
+
+      - name: Lint Go
+        run: mise run lint
+
+      - name: Lint Shell
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: ./bin
+          severity: warning
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: jdx/mise-action@v3
+
+      - name: Install jj
+        uses: cargo-bins/cargo-binstall@main
+      - run: cargo binstall -y jj-cli && jj --version
+
+      - name: Configure jj
+        run: |
+          jj config set --user user.name "GitHub Actions"
+          jj config set --user user.email "actions@github.com"
+
+      - name: Test
+        run: mise run test
+
+      - name: Install fish
+        run: sudo apt-get install -y fish
+
+      - name: Test fish integration
+        run: |
+          fish -c '
+            source shell/fish/functions/jjtask-env.fish
+            set -gx JJTASK_PROFILE (pwd)
+            jjtask-env
+            test -n "$JJ_CONFIG" || exit 1
+            echo $PATH | grep -q jjtask/bin || exit 1
+            jjtask-env off
+            test -z "$JJ_CONFIG" || exit 1
+          '

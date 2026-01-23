@@ -1,0 +1,1 @@
+Error: command "nonexistent-cmd-xyz" not found

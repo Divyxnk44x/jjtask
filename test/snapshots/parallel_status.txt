@@ -1,0 +1,16 @@
+Parallel Session: ID [task:todo] Parent task
+
+Mode: shared
+Started: just now ago
+
+Agent        Status     Task         Changes
+-----        ------     ----         -------
+agent-a      todo       (shared)     no changes
+agent-b      todo       (shared)     no changes
+
+DAG:
+@  ID (ID) [task:todo] Parent task +10L
+│     mode: shared started: TIMESTAMP
+~  ### Agents
+   - agent-a:  | Agent 1
+   - agent-b:  | Agent 2

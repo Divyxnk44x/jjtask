@@ -1,0 +1,3 @@
+Found 3 task root(s) to hoist: ID
+Rebased 3 commits to destination
+Done

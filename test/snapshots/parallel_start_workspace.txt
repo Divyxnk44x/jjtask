@@ -1,0 +1,25 @@
+Created new commit ID HASH (empty) [task:wip] agent-a task
+Created workspace in ".jjtask-workspaces/agent-a"
+Working copy at: ID HASH (empty) (no description set)
+Parent commit: ID HASH (empty) [task:wip] agent-a task
+Created new commit ID HASH (empty) [task:wip] agent-b task
+Created workspace in ".jjtask-workspaces/agent-b"
+Working copy at: ID HASH (empty) (no description set)
+Parent commit: ID HASH (empty) [task:wip] agent-b task
+Rebased N descendant commits
+Working copy at: ID HASH (empty) [task:wip] Parent task
+Parent commit: ID HASH (empty) (no description set)
+Rebased N descendant commits
+Working copy at: ID HASH (empty) [task:todo] Parent task
+Parent commit: ID HASH (empty) (no description set)
+Parallel session started (mode: workspace)
+
+Agent: agent-a
+  Workspace: .jjtask-workspaces/agent-a
+  Task: ID
+
+Agent: agent-b
+  Workspace: .jjtask-workspaces/agent-b
+  Task: ID
+
+To get agent context: jjtask agent-context <agent-id>

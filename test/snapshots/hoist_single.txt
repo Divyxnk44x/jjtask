@@ -1,0 +1,3 @@
+Found 1 task root(s) to hoist: ID
+Rebased 1 commits to destination
+Done

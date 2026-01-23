@@ -1,0 +1,102 @@
+[tools]
+go = "1.25"
+"golangci-lint" = "latest"
+semver = "latest"
+
+[tasks.build]
+description = "Build the jjtask binary"
+run = "go build -o bin/jjtask-go ./cmd/jjtask"
+
+[tasks.test]
+description = "Run integration tests"
+depends = ["build"]
+run = "./test.sh"
+
+[tasks.lint]
+description = "Run golangci-lint"
+run = "golangci-lint run"
+
+[tasks.fmt]
+description = "Format Go code"
+run = "go fmt ./..."
+
+[tasks.tidy]
+description = "Tidy Go modules"
+run = "go mod tidy"
+
+[tasks.clean]
+description = "Clean build artifacts"
+run = "rm -f bin/jjtask-go && go clean"
+
+[tasks.install]
+description = "Install jjtask to ~/.local/bin"
+depends = ["build"]
+run = "./install.sh"
+
+[tasks.dev]
+description = "Dev setup: symlinks + completions"
+depends = ["build"]
+run = "./dev.sh"
+
+[tasks.release]
+description = "Create and push a release tag (patch/minor/major or vX.Y.Z)"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+
+arg="${1:-}"
+if [[ -z "$arg" ]]; then
+  echo "Usage: mise run release <patch|minor|major|vX.Y.Z>"
+  current=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+  echo ""
+  echo "Current: $current"
+  echo "  patch → v$(semver bump patch "$current")"
+  echo "  minor → v$(semver bump minor "$current")"
+  echo "  major → v$(semver bump major "$current")"
+  exit 1
+fi
+
+# Get current version from latest tag
+current=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+
+# Compute new version
+case "$arg" in
+  patch|minor|major)
+    version="v$(semver bump "$arg" "$current")"
+    ;;
+  v*)
+    version="$arg"
+    ;;
+  *)
+    echo "Error: argument must be patch, minor, major, or vX.Y.Z"
+    exit 1
+    ;;
+esac
+
+if [[ "$(semver validate "${version#v}")" != "valid" ]]; then
+  echo "Error: invalid version $version"
+  exit 1
+fi
+
+echo "Releasing: $current → $version"
+
+# Strip v prefix for semver in plugin.json
+ver="${version#v}"
+
+echo "Updating plugin.json version to $ver..."
+sed -i.bak "s/\"version\": \".*\"/\"version\": \"$ver\"/" claude-plugin/.claude-plugin/plugin.json
+rm -f claude-plugin/.claude-plugin/plugin.json.bak
+
+# Commit version bump if changed
+if ! jj diff --quiet; then
+  jj commit -m "Release $version"
+fi
+
+echo "Pushing..."
+jj git push
+
+git tag -f "$version"
+git push origin "$version" --force
+
+echo "Done. Check: https://github.com/coobaha/jjtask/actions"
+"""

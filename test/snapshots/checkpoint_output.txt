@@ -1,0 +1,7 @@
+Checkpoint 'test-checkpoint' at operation: OPID
+  Restore with: jj op restore OPID
+
+  Current state:
+@  ID (ID) (no description set)
+│
+~

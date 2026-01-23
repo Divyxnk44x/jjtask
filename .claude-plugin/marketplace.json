@@ -1,0 +1,25 @@
+{
+  "name": "jjtask-marketplace",
+  "owner": {
+    "name": "Alexander Ryzhikov"
+  },
+  "plugins": [
+    {
+      "name": "jjtask",
+      "description": "Structured task management using JJ (Jujutsu). Uses empty revisions as TODO markers with [task:*] flags, forming a DAG of plannable and executable tasks.",
+      "source": "./claude-plugin",
+      "keywords": [
+        "task-management",
+        "jujutsu",
+        "jj",
+        "version-control",
+        "ai-workflow",
+        "todo",
+        "dag",
+        "parallel-agents",
+        "claude-code",
+        "agentic"
+      ]
+    }
+  ]
+}

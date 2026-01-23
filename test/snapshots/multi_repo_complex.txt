@@ -1,0 +1,31 @@
+cwd: TMPDIR | repo: root
+
+=== root: jj -R . log ===
+○  ID [task:todo] ROOT: Integration tests
+│ ○  ID [task:draft] ROOT: Terraform modules
+├─╯
+│ ○  ID [task:todo] ROOT: CI/CD pipeline
+├─╯
+@  ID
+│
+~
+
+=== frontend: jj -R ./frontend log ===
+○  ID [task:todo] FE: Error boundaries
+│ ○  ID [task:draft] FE: Dark mode toggle
+├─╯
+│ ○  ID [task:todo] FE: Auth login page
+├─╯
+@  ID
+│
+~
+
+=== backend: jj -R ./backend log ===
+○  ID [task:todo] BE: Background jobs
+│ ○  ID [task:draft] BE: GraphQL schema
+├─╯
+│ ○  ID [task:todo] BE: User API endpoints
+├─╯
+@  ID
+│
+~

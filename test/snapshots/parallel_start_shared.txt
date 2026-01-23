@@ -1,0 +1,16 @@
+Warning: No file assignments specified for shared mode
+Use --assign to specify: --assign "agent-a:src/api/**,agent-b:src/ui/**"
+Without assignments, agents may conflict by editing the same files
+
+Working copy at: ID HASH (empty) [task:wip] Parent task
+Parent commit: ID HASH (empty) (no description set)
+Working copy at: ID HASH (empty) [task:todo] Parent task
+Parent commit: ID HASH (empty) (no description set)
+Parallel session started (mode: shared)
+
+Agent: agent-a
+
+Agent: agent-b
+
+To get agent context: jjtask agent-context <agent-id>
+Note: Agents share @ - coordinate file assignments before starting

@@ -1,0 +1,45 @@
+
+## JJ TASK Quick Reference
+
+Task flags: draft → todo → wip → done (also: blocked, standby, untested, review)
+
+### Revsets
+tasks(), tasks_pending(), tasks_todo(), tasks_wip(), tasks_done(), tasks_blocked()
+
+### Commands (all support -R, --quiet, etc.)
+jjtask find [FLAG] [-r REVSET]       List tasks (flags: todo/wip/done/all, -r for revset)
+jjtask create PARENT TITLE [DESC]    Create task child of PARENT (required)
+jjtask flag REV FLAG                 Change task flag
+jjtask next [--mark-as FLAG] [REV]   Review current specs, optionally transition
+jjtask hoist                         Rebase pending tasks to children of @
+jjtask finalize [REV]                Strip [task:*] prefix for final commit
+jjtask parallel PARENT T1 T2...      Create sibling tasks under PARENT
+jjtask show-desc [REV]               Print revision description
+jjtask desc-transform REV SED_EXPR   Transform description with sed
+jjtask batch-desc SED_EXPR REVSET    Transform multiple descriptions
+jjtask checkpoint [MSG]              Create checkpoint commit
+jjtask all CMD [ARGS]                Run jj CMD across workspaces
+
+### Workflow
+1. `/jjtask` - load skill for full workflow docs
+2. `jjtask find` - see task DAG (DAG order = priority)
+3. `jjtask show-desc REV` - read FULL spec before starting
+4. `jj edit REV && jjtask flag @ wip` - start work
+5. `jjtask hoist` - after commits, rebase tasks to stay children of @
+6. `jjtask next --mark-as done NEXT` - only when ALL criteria met
+
+### Rules
+- DAG = priority: parent tasks complete before children
+- Chain related tasks: `jjtask create PREV_TASK 'Next step'`
+- Read full spec before editing - descriptions are specifications
+- Never mark done unless ALL acceptance criteria pass
+- Use --mark-as review/blocked/untested if incomplete
+- `jjtask hoist` keeps task DAG connected to current work
+- Stop and report if unsure - don't attempt JJ recovery ops
+
+### Native Task Tools
+TaskCreate, TaskUpdate, TaskList, TaskGet - for session workflow tracking
+Use for: multi-step work within a session, dependency ordering, progress display
+jjtask = persistent tasks in repo history; Task* = ephemeral session tracking
+
+### Current Tasks

@@ -5,6 +5,8 @@
 
 Structured task management using JJ (Jujutsu). Uses empty revisions as TODO markers with `[task:*]` flags, forming a DAG of plannable and executable tasks.
 
+<img width="711" height="667" alt="jjtask log" src="https://github.com/user-attachments/assets/9784a47c-5826-4aff-b9cb-dbed4d23469a" />
+
 ## Prerequisites
 
 - [JJ (Jujutsu)](https://martinvonz.github.io/jj/) - install with `cargo install jj-cli` or `brew install jj`

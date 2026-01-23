@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# jjtask - dispatcher for jj task subcommand
+# Delegates to Go binary, downloads if missing
+
+set -euo pipefail
+
+JJTASK_SOURCE="${BASH_SOURCE[0]}"
+while [[ -L "$JJTASK_SOURCE" ]]; do
+  JJTASK_SOURCE="$(readlink "$JJTASK_SOURCE")"
+done
+JJTASK_BIN="$(cd "$(dirname "$JJTASK_SOURCE")" && pwd)"
+JJTASK_GO="$JJTASK_BIN/jjtask-go"
+
+download_binary() {
+  local os arch asset
+  os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+  arch="$(uname -m)"
+  case "$arch" in
+    x86_64) arch="amd64" ;;
+    aarch64|arm64) arch="arm64" ;;
+    *) echo "jjtask: unsupported architecture: $arch" >&2; return 1 ;;
+  esac
+
+  asset="jjtask-${os}-${arch}.tar.gz"
+  local tmp
+  tmp="$(mktemp -d)"
+  trap "rm -rf '$tmp'" EXIT
+
+  # Try gh CLI first (works with private repos)
+  if command -v gh &>/dev/null; then
+    echo "jjtask: downloading via gh..." >&2
+    if gh release download --repo coobaha/jjtask --pattern "$asset" --dir "$tmp" 2>/dev/null; then
+      tar -xzf "$tmp/$asset" -C "$tmp"
+      mv "$tmp/jjtask-go" "$JJTASK_GO"
+      chmod +x "$JJTASK_GO"
+      echo "jjtask: installed to $JJTASK_GO" >&2
+      return 0
+    fi
+  fi
+
+  # Fall back to curl (public repos only)
+  local url="https://github.com/coobaha/jjtask/releases/latest/download/$asset"
+  echo "jjtask: downloading from $url..." >&2
+  if curl -fsSL "$url" -o "$tmp/$asset"; then
+    tar -xzf "$tmp/$asset" -C "$tmp"
+    mv "$tmp/jjtask-go" "$JJTASK_GO"
+    chmod +x "$JJTASK_GO"
+    echo "jjtask: installed to $JJTASK_GO" >&2
+    return 0
+  fi
+
+  return 1
+}
+
+# Download if missing
+if [[ ! -x "$JJTASK_GO" ]]; then
+  if ! download_binary; then
+    echo "jjtask: binary not found and download failed." >&2
+    echo "jjtask: install Go and run: go build -o bin/jjtask-go ./cmd/jjtask" >&2
+    exit 1
+  fi
+fi
+
+exec "$JJTASK_GO" "$@"

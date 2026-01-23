@@ -15,8 +15,8 @@ Structured task management using JJ (Jujutsu). Uses empty revisions as TODO mark
 
 ```bash
 # Claude Code plugin
-/plugin marketplace add Coobaha/jjtask
-/plugin install jjtask@jjtask-marketplace
+claude plugin marketplace add Coobaha/jjtask
+claude plugin install jjtask@jjtask-marketplace
 ```
 
 <img width="775" height="245" alt="Claude Code installation" src="https://github.com/user-attachments/assets/81607621-6ed3-4374-92a5-c007b5f8986f" />

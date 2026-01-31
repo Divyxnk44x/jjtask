@@ -1,3 +1,27 @@
+# Command Reference
+
+## jjtask Commands
+
+| Command                                  | Purpose                            |
+| ---------------------------------------- | ---------------------------------- |
+| `jjtask create [PARENT] TITLE [DESC]`    | Create TODO (parent defaults to @) |
+| `jjtask wip [TASKS...]`                  | Mark WIP, add as parents of @      |
+| `jjtask done [TASKS...]`                 | Mark done, rebase on top of work   |
+| `jjtask drop TASKS... [--abandon]`       | Remove from @ (standby or abandon) |
+| `jjtask squash`                          | Flatten @ merge for push           |
+| `jjtask parallel T1 T2... [-p REV]`      | Create parallel TODOs              |
+| `jjtask flag STATUS [-r REV]`            | Update status flag (defaults to @) |
+| `jjtask find [-s STATUS] [-r REVSET]`    | Find tasks by status or revset     |
+| `jjtask show-desc [-r REV]`              | Print revision description         |
+| `jjtask desc-transform CMD [-r REV]`     | Transform description with command |
+| `jjtask batch-desc EXPR -r REVSET`       | Transform multiple descriptions    |
+| `jjtask checkpoint [-m MSG]`             | Create named checkpoint            |
+| `jjtask stale`                           | Find done tasks not in @'s ancestry|
+| `jjtask all <cmd> [args]`                | Run jj command across all repos    |
+| `jjtask prime [--compact]`               | Output session context for hooks   |
+
+## JJ Command Syntax
+
 <command_syntax>
 <flag_usage>
 JJ commands are inconsistent with flag naming. For most commands, use `-r` only:

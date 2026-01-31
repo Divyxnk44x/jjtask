@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/bin/jjtask prime",
+            "command": "${CLAUDE_PLUGIN_ROOT}/bin/jjtask prime --compact",
             "timeout": 10
           }
         ]
@@ -38,7 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/bin/jjtask prime",
+            "command": "${CLAUDE_PLUGIN_ROOT}/bin/jjtask prime --compact",
             "timeout": 10
           }
         ]

@@ -23,6 +23,22 @@ echo "Restoring installed_plugins.json from backup..."
 cp "$BACKUP_FILE" "$PLUGINS_JSON"
 rm "$BACKUP_FILE"
 
+# Restore plugin cache binaries (download fresh copies)
+PLUGIN_CACHE_DIR="${HOME}/.claude/plugins/cache/jjtask-marketplace/jjtask"
+if [[ -d "$PLUGIN_CACHE_DIR" ]]; then
+  echo ""
+  echo "Restoring plugin cache binaries..."
+  for version_dir in "$PLUGIN_CACHE_DIR"/*/bin; do
+    [[ -d "$version_dir" ]] || continue
+    cache_bin="$version_dir/jjtask-go"
+    if [[ -L "$cache_bin" ]]; then
+      rm "$cache_bin"
+      echo "  Removed symlink: $(basename "$(dirname "$version_dir")")/jjtask-go"
+      echo "  Note: Re-install plugin or run 'jjtask' to download binary"
+    fi
+  done
+fi
+
 # Clean up agent-space symlinks
 AGENT_JJ_CONFIG="${HOME}/.config/claude/.agent-space/jj-config"
 if [[ -d "$AGENT_JJ_CONFIG" ]]; then

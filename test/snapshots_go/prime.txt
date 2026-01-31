@@ -55,10 +55,9 @@ Use for: multi-step work within a session, dependency ordering, progress display
 jjtask = persistent tasks in repo history; Task* = ephemeral session tracking
 
 ### Current Tasks
-
-No tasks. Create one with: jjtask create 'Task title'
-
-### Changes (0 files +0 -0)
+@  qpvuntsm
+│
+~
 
 # after
 @  qpvuntsm

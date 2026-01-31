@@ -88,11 +88,11 @@ Examples:
 					return fmt.Errorf("unknown status %q", status)
 				}
 			}
-			// Show connected DAG for active tasks, plain list for done/all
+			// Show tasks + @ (jj handles elision for gaps in history)
 			if status == "done" || status == "all" {
 				revset = taskRevset
 			} else {
-				revset = fmt.Sprintf("%s | fork_point(%s | @)::@", taskRevset, taskRevset)
+				revset = fmt.Sprintf("%s | @", taskRevset)
 			}
 		}
 
@@ -113,54 +113,60 @@ Examples:
 			fmt.Println()
 		}
 
-		for _, repo := range repos {
-			repoPath := workspace.ResolveRepoPath(repo, workspaceRoot)
+		PrintTasksWithRevset(repos, workspaceRoot, revset)
+		return nil
+	},
+}
 
+// PrintTasksWithRevset outputs tasks matching revset across repos
+func PrintTasksWithRevset(repos []workspace.Repo, workspaceRoot, revset string) {
+	isMulti := len(repos) > 1
+
+	for _, repo := range repos {
+		repoPath := workspace.ResolveRepoPath(repo, workspaceRoot)
+
+		if isMulti {
+			displayPath := workspace.RelativePath(repoPath)
+			fmt.Printf("=== %s: jj -R %s log ===\n", workspace.DisplayName(repo), displayPath)
+		}
+
+		jjArgs := []string{}
+		if globals.Color != "" {
+			jjArgs = append(jjArgs, "--color", globals.Color)
+		} else if client.IsTTY {
+			jjArgs = append(jjArgs, "--color=always")
+		}
+		jjArgs = append(jjArgs, "-R", repoPath, "log", "-r", revset, "-T", "task_log")
+
+		jjCmd := exec.Command("jj", jjArgs...)
+		jjCmd.Env = append(os.Environ(), "JJ_ALLOW_TASK=1", "JJ_NO_HINTS=1")
+
+		output, err := jjCmd.Output()
+		if err != nil {
 			if isMulti {
-				displayPath := workspace.RelativePath(repoPath)
-				fmt.Printf("=== %s: jj -R %s log ===\n", workspace.DisplayName(repo), displayPath)
-			}
-
-			jjArgs := []string{}
-			if globals.Color != "" {
-				jjArgs = append(jjArgs, "--color", globals.Color)
-			} else if client.IsTTY {
-				jjArgs = append(jjArgs, "--color=always")
-			}
-			jjArgs = append(jjArgs, "-R", repoPath, "log", "-r", revset, "-T", "task_log")
-
-			jjCmd := exec.Command("jj", jjArgs...)
-			jjCmd.Env = append(os.Environ(), "JJ_ALLOW_TASK=1", "JJ_NO_HINTS=1")
-
-			output, err := jjCmd.Output()
-			if err != nil {
-				if isMulti {
-					if client.IsTTY {
-						fmt.Println("~  \033[32m(no tasks)\033[0m")
-					} else {
-						fmt.Println("~  (no tasks)")
-					}
-				}
-			} else {
-				outStr := strings.TrimRight(string(output), "\n")
-				if outStr != "" {
-					fmt.Println(outStr)
-				} else if isMulti {
-					if client.IsTTY {
-						fmt.Println("~  \033[32m(no tasks)\033[0m")
-					} else {
-						fmt.Println("~  (no tasks)")
-					}
+				if client.IsTTY {
+					fmt.Println("~  \033[32m(no tasks)\033[0m")
+				} else {
+					fmt.Println("~  (no tasks)")
 				}
 			}
-
-			if isMulti {
-				fmt.Println()
+		} else {
+			outStr := strings.TrimRight(string(output), "\n")
+			if outStr != "" {
+				fmt.Println(outStr)
+			} else if isMulti {
+				if client.IsTTY {
+					fmt.Println("~  \033[32m(no tasks)\033[0m")
+				} else {
+					fmt.Println("~  (no tasks)")
+				}
 			}
 		}
 
-		return nil
-	},
+		if isMulti {
+			fmt.Println()
+		}
+	}
 }
 
 func init() {

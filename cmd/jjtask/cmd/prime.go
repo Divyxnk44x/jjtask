@@ -71,6 +71,8 @@ func detectHookEvent() (event hookEvent, trigger string) {
 	return hookEventSessionStart, ""
 }
 
+var primeCompact bool
+
 var primeCmd = &cobra.Command{
 	Use:   "prime",
 	Short: "Output session context for hooks",
@@ -80,7 +82,9 @@ This is typically used by SessionStart and PreCompact hooks to provide
 context about pending tasks to AI assistants.
 
 For PreCompact (auto), outputs task state verification instructions.
-For SessionStart, outputs full quick reference.`,
+For SessionStart, outputs full quick reference.
+
+Use --compact for minimal output (task counts only).`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		event, trigger := detectHookEvent()
@@ -88,6 +92,10 @@ For SessionStart, outputs full quick reference.`,
 		// PreCompact auto = context nearly full, output verification prompt
 		if event == hookEventPreCompact && trigger == "auto" {
 			return printPreCompactContext()
+		}
+
+		if primeCompact {
+			return printCompactPrime()
 		}
 
 		// Check for custom prime content
@@ -164,23 +172,7 @@ For SessionStart, outputs full quick reference.`,
 		fmt.Println()
 
 		fmt.Println("### Current Tasks")
-		fmt.Println()
-
-		repos, workspaceRoot, _ := workspace.GetRepos()
-
-		hasTasks := false
-		for _, repo := range repos {
-			repoPath := workspace.ResolveRepoPath(repo, workspaceRoot)
-			if printCompactTasks(repoPath, len(repos) > 1, workspace.DisplayName(repo)) {
-				hasTasks = true
-			}
-		}
-		if !hasTasks {
-			fmt.Println("No tasks. Create one with: jjtask create 'Task title'")
-		}
-
-		fmt.Println()
-		printCompactChanges()
+		printTaskDAG()
 
 		return nil
 	},
@@ -190,211 +182,13 @@ For SessionStart, outputs full quick reference.`,
 func printCurrentTasks() {
 	fmt.Println()
 	fmt.Println("### Current Tasks")
-	fmt.Println()
+	printTaskDAG()
+}
 
+// printTaskDAG outputs pending tasks with @ using graph view
+func printTaskDAG() {
 	repos, workspaceRoot, _ := workspace.GetRepos()
-
-	hasTasks := false
-	for _, repo := range repos {
-		repoPath := workspace.ResolveRepoPath(repo, workspaceRoot)
-		if printCompactTasks(repoPath, len(repos) > 1, workspace.DisplayName(repo)) {
-			hasTasks = true
-		}
-	}
-	if !hasTasks {
-		fmt.Println("No tasks. Create one with: jjtask create 'Task title'")
-	}
-}
-
-// taskSection holds tasks for one status category
-type taskSection struct {
-	header string
-	lines  []string
-}
-
-// printCompactTasks outputs tasks in compact format: id | title, aligned across all sections
-// Returns true if any tasks were printed
-func printCompactTasks(repoPath string, isMulti bool, repoName string) bool {
-	if isMulti {
-		fmt.Printf("--- %s ---\n", repoName)
-	}
-
-	// Collect all sections
-	sections := []taskSection{
-		{"WIP", queryTaskLines(repoPath, "tasks_wip()", "[task:wip] ")},
-		{"Todo", queryTaskLines(repoPath, "tasks_todo()", "[task:todo] ")},
-		{"Draft", queryTaskLines(repoPath, "tasks_draft()", "[task:draft] ")},
-	}
-
-	// Find max ID length across all sections
-	maxIDLen := 0
-	for _, sec := range sections {
-		for _, line := range sec.lines {
-			if idx := strings.Index(line, " | "); idx > maxIDLen {
-				maxIDLen = idx
-			}
-		}
-	}
-
-	// Print each section with aligned columns
-	printed := false
-	first := true
-	for _, sec := range sections {
-		if len(sec.lines) == 0 {
-			continue
-		}
-		if !first {
-			fmt.Println()
-		}
-		first = false
-		printed = true
-		fmt.Println(sec.header + ":")
-		for _, line := range sec.lines {
-			if idx := strings.Index(line, " | "); idx > 0 {
-				id := line[:idx]
-				title := line[idx+3:] // skip " | "
-				fmt.Printf("%-*s  %s\n", maxIDLen, id, title)
-			}
-		}
-	}
-
-	if isMulti {
-		fmt.Println()
-	}
-	return printed
-}
-
-// queryTaskLines queries tasks and returns lines as slice
-func queryTaskLines(repoPath, revset, prefix string) []string {
-	tmpl := `change_id.shortest() ++ " | " ++ description.first_line().remove_prefix("` + prefix + `") ++ if(has_spec, " [desc:" ++ desc_lines ++ "L]", "") ++ "\n"`
-	out, _ := client.Query("-R", repoPath, "log", "--no-graph", "-r", revset, "-T", tmpl)
-	out = strings.TrimSpace(out)
-	if out == "" {
-		return nil
-	}
-	var lines []string
-	for line := range strings.SplitSeq(out, "\n") {
-		if line != "" {
-			lines = append(lines, line)
-		}
-	}
-	return lines
-}
-
-// repoChanges holds changes for one repo
-type repoChanges struct {
-	name   string
-	files  int
-	adds   int
-	dels   int
-	detail string
-}
-
-// printCompactChanges outputs jj diff stat in compact format across all repos
-func printCompactChanges() {
-	repos, workspaceRoot, _ := workspace.GetRepos()
-	isMulti := len(repos) > 1
-
-	totalFiles := 0
-	totalAdds := 0
-	totalDels := 0
-	var repoResults []repoChanges
-
-	for _, repo := range repos {
-		repoPath := workspace.ResolveRepoPath(repo, workspaceRoot)
-		out, err := client.Query("-R", repoPath, "diff", "--stat")
-		if err != nil || strings.TrimSpace(out) == "" {
-			continue
-		}
-
-		lines := strings.Split(strings.TrimSpace(out), "\n")
-		if len(lines) == 0 {
-			continue
-		}
-
-		// Last line is summary like "5 files changed, 120 insertions(+), 45 deletions(-)"
-		summary := lines[len(lines)-1]
-		fileLines := lines[:len(lines)-1]
-
-		// Parse summary
-		summaryClean := strings.ReplaceAll(summary, " changed", "")
-		summaryClean = strings.ReplaceAll(summaryClean, " insertions(+)", "")
-		summaryClean = strings.ReplaceAll(summaryClean, " insertion(+)", "")
-		summaryClean = strings.ReplaceAll(summaryClean, " deletions(-)", "")
-		summaryClean = strings.ReplaceAll(summaryClean, " deletion(-)", "")
-		summaryClean = strings.ReplaceAll(summaryClean, ",", "")
-		parts := strings.Fields(summaryClean)
-
-		rc := repoChanges{name: workspace.DisplayName(repo)}
-		if len(parts) >= 2 {
-			_, _ = fmt.Sscanf(parts[0], "%d", &rc.files)
-			totalFiles += rc.files
-		}
-		if len(parts) >= 3 {
-			_, _ = fmt.Sscanf(parts[2], "%d", &rc.adds)
-			totalAdds += rc.adds
-		}
-		if len(parts) >= 4 {
-			_, _ = fmt.Sscanf(parts[3], "%d", &rc.dels)
-			totalDels += rc.dels
-		}
-
-		// Collect compact file list
-		var compactFiles []string
-		for _, line := range fileLines {
-			fileParts := strings.Split(line, "|")
-			if len(fileParts) != 2 {
-				continue
-			}
-			filePath := strings.TrimSpace(fileParts[0])
-			fileName := filePath[strings.LastIndex(filePath, "/")+1:]
-
-			statPart := strings.TrimSpace(fileParts[1])
-			statFields := strings.Fields(statPart)
-			if len(statFields) == 0 {
-				continue
-			}
-
-			adds := strings.Count(statPart, "+")
-			dels := strings.Count(statPart, "-")
-
-			stat := ""
-			if adds > 0 {
-				stat += fmt.Sprintf("+%d", adds)
-			}
-			if dels > 0 {
-				stat += fmt.Sprintf("-%d", dels)
-			}
-			if stat != "" {
-				compactFiles = append(compactFiles, fmt.Sprintf("%s %s", fileName, stat))
-			} else {
-				compactFiles = append(compactFiles, fileName)
-			}
-		}
-		rc.detail = strings.Join(compactFiles, " | ")
-		repoResults = append(repoResults, rc)
-	}
-
-	if totalFiles == 0 {
-		fmt.Println("### Changes (0 files +0 -0)")
-		return
-	}
-
-	// Build header with totals
-	fmt.Printf("### Changes (%d files +%d -%d)\n", totalFiles, totalAdds, totalDels)
-
-	// Output per-repo if multi-repo, otherwise just file list
-	if isMulti {
-		for _, rc := range repoResults {
-			if rc.files == 0 {
-				continue
-			}
-			fmt.Printf("--- %s ---\n", rc.name)
-			fmt.Println(rc.detail)
-		}
-	} else if len(repoResults) > 0 && repoResults[0].detail != "" {
-		fmt.Println(repoResults[0].detail)
-	}
+	PrintTasksWithRevset(repos, workspaceRoot, "tasks_pending() | @")
 }
 
 // printPreCompactContext outputs task verification when context is nearly full
@@ -442,6 +236,48 @@ func printPreCompactContext() error {
 	return nil
 }
 
+// printCompactPrime outputs minimal task summary
+func printCompactPrime() error {
+	repos, workspaceRoot, _ := workspace.GetRepos()
+
+	var totalWIP, totalTodo, totalDraft int
+	for _, repo := range repos {
+		repoPath := workspace.ResolveRepoPath(repo, workspaceRoot)
+
+		count := func(revset string) int {
+			out, _ := client.Query("-R", repoPath, "log", "--no-graph", "-r", revset, "-T", "change_id.shortest() ++ \"\\n\"")
+			if out == "" {
+				return 0
+			}
+			return len(strings.Split(strings.TrimSpace(out), "\n"))
+		}
+
+		totalWIP += count("tasks_wip()")
+		totalTodo += count("tasks_todo()")
+		totalDraft += count("tasks_draft()")
+	}
+
+	fmt.Println()
+	fmt.Println("## JJ TASK Quick Reference")
+	fmt.Println()
+	fmt.Println("Task flags: draft → todo → wip → done (also: blocked, standby, untested, review)")
+	fmt.Printf("Current: %d wip, %d todo, %d draft\n", totalWIP, totalTodo, totalDraft)
+	fmt.Println()
+	fmt.Println("```")
+	fmt.Println("jjtask find              # show task DAG")
+	fmt.Println("jjtask show-desc -r ID   # read spec before starting")
+	fmt.Println("jjtask wip ID            # start task")
+	fmt.Println("jjtask done              # complete (all criteria met)")
+	fmt.Println("jjtask create TITLE      # new task")
+	fmt.Println("jjtask -h                # all commands")
+	fmt.Println("```")
+	fmt.Println()
+	fmt.Println("Load `/jjtask` for full workflow.")
+
+	return nil
+}
+
 func init() {
 	rootCmd.AddCommand(primeCmd)
+	primeCmd.Flags().BoolVar(&primeCompact, "compact", false, "minimal output (task counts only)")
 }

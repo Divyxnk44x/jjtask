@@ -43,14 +43,29 @@ echo "CLI setup:"
 mkdir -p "$BIN_DIR"
 symlink "$SCRIPT_DIR/bin/jjtask" "$BIN_DIR/jjtask" || true
 
-# 2. Symlink jjtask-go in plugin dir to local build
+# 2. Symlink jjtask-go in plugin dir and cache to local build
 if [[ -x "$SCRIPT_DIR/bin/jjtask-go" ]]; then
+  # Plugin source dir
   dst="$PLUGIN_SOURCE/bin/jjtask-go"
   if [[ -e "$dst" ]] || [[ -L "$dst" ]]; then
     rm "$dst"
   fi
   ln -s "$SCRIPT_DIR/bin/jjtask-go" "$dst"
   echo "  Linked: plugin jjtask-go -> bin/jjtask-go"
+
+  # Plugin cache (used by agent sessions)
+  PLUGIN_CACHE_DIR="${HOME}/.claude/plugins/cache/jjtask-marketplace/jjtask"
+  if [[ -d "$PLUGIN_CACHE_DIR" ]]; then
+    for version_dir in "$PLUGIN_CACHE_DIR"/*/bin; do
+      [[ -d "$version_dir" ]] || continue
+      cache_dst="$version_dir/jjtask-go"
+      if [[ -e "$cache_dst" ]] || [[ -L "$cache_dst" ]]; then
+        rm "$cache_dst"
+      fi
+      ln -s "$SCRIPT_DIR/bin/jjtask-go" "$cache_dst"
+      echo "  Linked: cache $(basename "$(dirname "$version_dir")")/jjtask-go -> bin/jjtask-go"
+    done
+  fi
 else
   echo "  Skipping plugin binary (run 'mise run build' first)"
 fi

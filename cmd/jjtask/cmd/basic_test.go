@@ -158,6 +158,60 @@ func TestDescTransformError(t *testing.T) {
 
 }
 
+func TestDescTransformMultiline(t *testing.T) {
+	t.Parallel()
+	repo := SetupTestRepo(t)
+
+	repo.Run("jjtask", "create", "Test task", "## Context\nOriginal content")
+	taskID := repo.GetTaskID("todo")
+
+	// Test multiline replacement with \n in replacement text
+	repo.Run("jjtask", "desc-transform", "--rev", taskID, `s/Original content/New line 1\nNew line 2/`)
+
+	output := repo.Run("jjtask", "show-desc", "--rev", taskID)
+	if !strings.Contains(output, "New line 1\nNew line 2") {
+		t.Errorf("multiline replacement failed, got: %s", output)
+	}
+}
+
+func TestDescTransformGlobalFlag(t *testing.T) {
+	t.Parallel()
+	repo := SetupTestRepo(t)
+
+	repo.Run("jjtask", "create", "foo bar foo", "foo baz foo")
+	taskID := repo.GetTaskID("todo")
+
+	// Test global replacement
+	repo.Run("jjtask", "desc-transform", "--rev", taskID, "s/foo/XXX/g")
+
+	output := repo.Run("jjtask", "show-desc", "--rev", taskID)
+	if strings.Contains(output, "foo") {
+		t.Errorf("global replacement failed, still contains 'foo': %s", output)
+	}
+	if !strings.Contains(output, "XXX bar XXX") {
+		t.Errorf("global replacement failed, expected 'XXX bar XXX' in: %s", output)
+	}
+}
+
+func TestDescTransformStdin(t *testing.T) {
+	t.Parallel()
+	repo := SetupTestRepo(t)
+
+	repo.Run("jjtask", "create", "Original", "old content")
+	taskID := repo.GetTaskID("todo")
+
+	// Test --stdin to replace entire description
+	repo.RunWithStdin("[task:todo] New title\n\nMultiline\ncontent\nhere", "jjtask", "desc-transform", "--rev", taskID, "--stdin")
+
+	output := repo.Run("jjtask", "show-desc", "--rev", taskID)
+	if !strings.Contains(output, "New title") {
+		t.Errorf("stdin replacement failed, expected 'New title' in: %s", output)
+	}
+	if !strings.Contains(output, "Multiline\ncontent\nhere") {
+		t.Errorf("stdin multiline failed, got: %s", output)
+	}
+}
+
 func TestConfigTaskLogDiffStats(t *testing.T) {
 	t.Parallel()
 	repo := SetupTestRepo(t)

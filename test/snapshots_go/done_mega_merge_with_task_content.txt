@@ -75,8 +75,9 @@ Added 1 files, modified 0 files, removed 0 files
 # after
 @    lylxulpl
 ├─╮
-│ ○  vruxwmqv [task:wip] Task A with content
+│ ○  other [task:wip] Task B with content
 ○ │  mzvwutvl Work commit 2
+○ │  vruxwmqv [task:wip] Task A with content
 ○ │  zsuskuln Work commit 1
 ├─╯
 ○  qpvuntsm Base commit
@@ -102,4 +103,3 @@ Parent commit (@-)      : vruxwmqv bfe2d3b2 [task:done] Task A with content
 ○  zsuskuln Work commit 1
 ○  qpvuntsm Base commit
 ◆  zzzzzzzz root() 00000000
-

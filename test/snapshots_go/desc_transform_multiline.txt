@@ -1,0 +1,33 @@
+# before
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask create Test task ## Context
+Original content
+Created new commit kkmpptxz 5d6006d1 (empty) [task:todo] Test task
+Created new commit k (empty) [task:todo] Test task
+
+# after
+○  kkmpptxz [task:todo] Test task
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask desc-transform --rev k s/Original content/New line 1\nNew line 2/
+
+# after
+○  kkmpptxz [task:todo] Test task
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask show-desc --rev k
+[task:todo] Test task
+
+## Context
+New line 1
+New line 2
+
+# after
+○  kkmpptxz [task:todo] Test task
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+

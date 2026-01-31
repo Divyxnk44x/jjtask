@@ -1,0 +1,30 @@
+# before
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask create foo bar foo foo baz foo
+Created new commit kkmpptxz 88cc2f5a (empty) [task:todo] foo bar foo
+Created new commit k (empty) [task:todo] foo bar foo
+
+# after
+○  kkmpptxz [task:todo] foo bar foo
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask desc-transform --rev k s/foo/XXX/g
+
+# after
+○  kkmpptxz [task:todo] XXX bar XXX
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask show-desc --rev k
+[task:todo] XXX bar XXX
+
+XXX baz XXX
+
+# after
+○  kkmpptxz [task:todo] XXX bar XXX
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+

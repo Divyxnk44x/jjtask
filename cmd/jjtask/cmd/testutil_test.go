@@ -209,6 +209,30 @@ func (r *TestRepo) GetTaskID(flag string) string {
 	return lines[0]
 }
 
+// RunWithStdin executes a command with input piped to stdin
+func (r *TestRepo) RunWithStdin(input string, name string, args ...string) string {
+	r.t.Helper()
+
+	execName := name
+	if name == "jjtask" {
+		execName = filepath.Join(r.findProjectRoot(), "bin", "jjtask-go")
+	}
+	cmd := exec.Command(execName, args...)
+	cmd.Dir = r.dir
+	cmd.Env = r.getEnvForCommand()
+	cmd.Stdin = strings.NewReader(input)
+	out, err := cmd.CombinedOutput()
+
+	fmt.Fprintf(r.log, "$ echo '...' | %s %s\n", name, strings.Join(args, " "))
+	fmt.Fprintf(r.log, "%s\n", out)
+
+	if err != nil {
+		r.t.Fatalf("command failed: %s %v\nerror: %v\noutput: %s", name, args, err, out)
+	}
+
+	return string(out)
+}
+
 // Trace returns the full command log
 func (r *TestRepo) Trace() string {
 	return r.log.String()

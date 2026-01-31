@@ -1,0 +1,32 @@
+# before
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask create Original old content
+Created new commit kkmpptxz 7fe74863 (empty) [task:todo] Original
+Created new commit k (empty) [task:todo] Original
+
+# after
+○  kkmpptxz [task:todo] Original
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ echo '...' | jjtask desc-transform --rev k --stdin
+
+# before
+○  kkmpptxz [task:todo] New title
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask show-desc --rev k
+[task:todo] New title
+
+Multiline
+content
+here
+
+# after
+○  kkmpptxz [task:todo] New title
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+

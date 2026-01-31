@@ -26,35 +26,28 @@ Examples:
 			revs = []string{"@"}
 		}
 
+		// Collect change IDs and mark all as WIP first
+		var changeIDs []string
 		for _, rev := range revs {
-			if err := markWip(rev); err != nil {
+			changeID, err := client.Query("log", "-r", rev, "--no-graph", "-T", "change_id.shortest()")
+			if err != nil {
+				return fmt.Errorf("getting change ID for %s: %w", rev, err)
+			}
+			changeID = strings.TrimSpace(changeID)
+			changeIDs = append(changeIDs, changeID)
+
+			if err := setTaskFlag(rev, "wip"); err != nil {
 				return fmt.Errorf("failed to mark %s as WIP: %w", rev, err)
 			}
 		}
 
+		// Single rebase to add all tasks as parents
+		if err := client.AddMultipleToMerge(changeIDs); err != nil {
+			return fmt.Errorf("adding tasks to merge: %w", err)
+		}
+
 		return nil
 	},
-}
-
-func markWip(rev string) error {
-	// Get change ID
-	changeID, err := client.Query("log", "-r", rev, "--no-graph", "-T", "change_id.shortest()")
-	if err != nil {
-		return fmt.Errorf("getting change ID: %w", err)
-	}
-	changeID = strings.TrimSpace(changeID)
-
-	// Mark as WIP
-	if err := setTaskFlag(rev, "wip"); err != nil {
-		return fmt.Errorf("setting flag: %w", err)
-	}
-
-	// Add to @ merge (preserves @ content)
-	if err := client.AddToMerge(changeID); err != nil {
-		return fmt.Errorf("adding to merge: %w", err)
-	}
-
-	return nil
 }
 
 func init() {

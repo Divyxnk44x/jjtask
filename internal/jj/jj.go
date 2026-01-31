@@ -323,46 +323,64 @@ func (c *Client) IsAncestorOf(rev, target string) (bool, error) {
 
 // AddToMerge adds a revision as a new parent of @, preserving @ content
 func (c *Client) AddToMerge(task string) error {
-	// Get @ change ID to check if task IS @
+	return c.AddMultipleToMerge([]string{task})
+}
+
+// AddMultipleToMerge adds multiple revisions as new parents of @ in a single rebase
+func (c *Client) AddMultipleToMerge(tasks []string) error {
+	if len(tasks) == 0 {
+		return nil
+	}
+
 	atID, err := c.Query("log", "-r", "@", "--no-graph", "-T", "change_id.shortest()")
 	if err != nil {
 		return fmt.Errorf("getting @ ID: %w", err)
 	}
 	atID = strings.TrimSpace(atID)
 
-	// If task is @ itself, nothing to do
-	if task == atID {
-		return nil
-	}
-
 	parents, err := c.GetParents("@")
 	if err != nil {
 		return fmt.Errorf("getting parents: %w", err)
 	}
 
-	// Check if already a parent
-	if slices.Contains(parents, task) {
-		return nil
-	}
-
-	// Filter out root commit - can't merge with root
-	var validParents []string
+	// Build new parent list: existing parents + new tasks (excluding @ itself, root, and duplicates)
+	seen := make(map[string]bool)
+	var newParents []string
 	for _, p := range parents {
-		if !isRootChangeID(p) {
-			validParents = append(validParents, p)
+		if !isRootChangeID(p) && !seen[p] {
+			seen[p] = true
+			newParents = append(newParents, p)
+		}
+	}
+	for _, task := range tasks {
+		if task != atID && !seen[task] {
+			seen[task] = true
+			newParents = append(newParents, task)
 		}
 	}
 
-	if len(validParents) == 0 {
-		// No real parents - just rebase onto task
-		return c.Run("rebase", "-r", "@", "-o", task)
+	// If nothing changed, skip
+	if len(newParents) == len(parents) {
+		allPresent := true
+		for _, t := range tasks {
+			if t != atID && !slices.Contains(parents, t) {
+				allPresent = false
+				break
+			}
+		}
+		if allPresent {
+			return nil
+		}
 	}
 
-	// Rebase @ onto existing parents + new task
+	if len(newParents) == 0 {
+		return nil
+	}
+
+	// Single rebase with all parents
 	args := []string{"rebase", "-r", "@"}
-	for _, p := range validParents {
+	for _, p := range newParents {
 		args = append(args, "-o", p)
 	}
-	args = append(args, "-o", task)
 	return c.Run(args...)
 }

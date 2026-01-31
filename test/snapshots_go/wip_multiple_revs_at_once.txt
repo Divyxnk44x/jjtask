@@ -44,25 +44,18 @@ Created new commit w (empty) [task:todo] Task C
 $ jjtask wip m y w
 Rebased 1 commits to destination
 Rebased 3 descendant commits
-Working copy  (@) now at: qpvuntsm c2b80b78 Base
-Parent commit (@-)      : mzvwutvl 8cbfb6a0 (empty) [task:wip] Task A
-Rebased 1 commits to destination
-Working copy  (@) now at: qpvuntsm 84f6b467 Base
+Working copy  (@) now at: qpvuntsm c9d2db0c Base
 Parent commit (@-)      : mzvwutvl 8cbfb6a0 (empty) [task:wip] Task A
 Parent commit (@-)      : yostqsxw 32b7e3b7 (empty) [task:wip] Task B
-Rebased 1 commits to destination
-Working copy  (@) now at: qpvuntsm cc5865a9 Base
-Parent commit (@-)      : yostqsxw 32b7e3b7 (empty) [task:wip] Task B
-Parent commit (@-)      : mzvwutvl 8cbfb6a0 (empty) [task:wip] Task A
 Parent commit (@-)      : wqnwkozp 9b2a879e (empty) [task:wip] Task C
 
 # after
 @      qpvuntsm Base
 ├─┬─╮
 │ │ ○  wqnwkozp [task:wip] Task C
-│ ○ │  mzvwutvl [task:wip] Task A
+│ ○ │  yostqsxw [task:wip] Task B
 │ ├─╯
-○ │  yostqsxw [task:wip] Task B
+○ │  mzvwutvl [task:wip] Task A
 ├─╯
 ◆  zzzzzzzz root() 00000000
 

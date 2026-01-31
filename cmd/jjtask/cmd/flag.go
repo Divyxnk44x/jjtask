@@ -17,7 +17,7 @@ var (
 )
 
 var flagCmd = &cobra.Command{
-	Use:       "flag <status> [--rev REV]",
+	Use:       "flag [REV] <status>",
 	Short:     "Update task status flag",
 	ValidArgs: validFlags,
 	Long: `Update the [task:*] flag in a revision description.
@@ -26,11 +26,20 @@ Valid flags: draft, todo, wip, untested, standby, review, blocked, done
 
 Examples:
   jjtask flag wip
+  jjtask flag xqq done
   jjtask flag done --rev mxyz`,
-	Args: cobra.ExactArgs(1),
+	Args: cobra.RangeArgs(1, 2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		toFlag := args[0]
+		var toFlag string
 		rev := flagRev
+
+		// Support both "flag STATUS" and "flag REV STATUS"
+		if len(args) == 2 {
+			rev = args[0]
+			toFlag = args[1]
+		} else {
+			toFlag = args[0]
+		}
 
 		if !slices.Contains(validFlags, toFlag) {
 			return fmt.Errorf("invalid flag %q, must be one of: %s", toFlag, strings.Join(validFlags, ", "))

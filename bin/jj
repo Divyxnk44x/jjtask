@@ -49,6 +49,22 @@ jj_exec() {
     exec "$JJ" ${JJ_TTY_ARGS[@]+"${JJ_TTY_ARGS[@]}"} "$@"
 }
 
+# Run jj and truncate output if too long (for agent mode)
+jj_truncated() {
+    local max_lines="${JJ_MAX_LINES:-100}"
+    local output
+    output=$("$JJ" ${JJ_TTY_ARGS[@]+"${JJ_TTY_ARGS[@]}"} "$@" 2>&1)
+    local line_count
+    line_count=$(echo "$output" | wc -l)
+    if [[ $line_count -gt $max_lines ]]; then
+        echo "$output" | head -n "$max_lines"
+        echo "... (truncated $((line_count - max_lines)) more lines, total $line_count)"
+        echo "HINT: Add --limit=N or refine revset" >&2
+    else
+        echo "$output"
+    fi
+}
+
 if [[ $# -eq 0 ]]; then
     [[ -f .jj-workspaces.yaml ]] && show_hint logall "AGENT HINT: For multi-repo: jjtask all log"
     jj_exec
@@ -87,13 +103,29 @@ case "$1" in
         done
         if [[ $has_limit -eq 0 ]]; then
             shift
-            jj_exec log --limit=15 "$@"
+            jj_truncated log --limit=50 "$@"
+            exit $?
         fi
+        # Has limit but still truncate output
+        jj_truncated "$@"
+        exit $?
         ;;
     show)
         show_hint show "AGENT HINT: For description only: jjtask show-desc [REV]"
         ;;
     describe|desc)
+        if [[ -z "${JJ_ALLOW_TASK:-}" ]]; then
+            for arg in "$@"; do
+                case "$arg" in
+                    *\[task:*)
+                        echo "BLOCKED (exit 1): Use jjtask commands for task flags:" >&2
+                        echo "  jjtask flag REV STATUS    # change status (wip/done/todo/etc)" >&2
+                        echo "  jjtask desc-transform     # edit description via sed" >&2
+                        exit 1
+                        ;;
+                esac
+            done
+        fi
         show_hint desc "AGENT HINT: Description patterns:" \
             $'\n'"  jjtask flag REV FLAG           # status only" \
             $'\n'"  jjtask desc-transform REV SED  # partial edit via sed" \

@@ -20,6 +20,18 @@
     "parallel-agents"
   ],
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/bin/jj-guard \"$CLAUDE_TOOL_INPUT_COMMAND\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "",

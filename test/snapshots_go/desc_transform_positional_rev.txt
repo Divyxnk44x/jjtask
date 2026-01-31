@@ -1,0 +1,30 @@
+# before
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask create Original title Some context
+Created new commit kkmpptxz 636198cd (empty) [task:todo] Original title
+Created new commit k (empty) [task:todo] Original title
+
+# after
+○  kkmpptxz [task:todo] Original title
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask desc-transform k s/Original/Modified/
+
+# after
+○  kkmpptxz [task:todo] Modified title
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask show-desc k
+[task:todo] Modified title
+
+Some context
+
+# after
+○  kkmpptxz [task:todo] Modified title
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+

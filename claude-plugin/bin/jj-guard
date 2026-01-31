@@ -1,0 +1,64 @@
+#!/bin/bash
+# Guard against bad jj patterns in Claude commands
+# Called by PreToolUse hook with command as argument
+
+CMD="$1"
+
+# Only check jj commands
+[[ "$CMD" != *"jj "* ]] && exit 0
+
+# Block: jj describe with [task:*]
+if [[ "$CMD" =~ jj[[:space:]]+desc(ribe)?[[:space:]] && "$CMD" == *"[task:"* ]]; then
+    echo "BLOCKED: Don't manually write [task:*] flags"
+    echo "Use: jjtask flag REV STATUS"
+    exit 1
+fi
+
+# Block: jj new with [task:*]
+if [[ "$CMD" =~ jj[[:space:]]+new[[:space:]] && "$CMD" == *"[task:"* ]]; then
+    echo "BLOCKED: Don't manually create task revisions"
+    echo "Use: jjtask create TITLE"
+    exit 1
+fi
+
+# Block: bad glob patterns with [task
+if [[ "$CMD" == *'glob:'*'[task'* || "$CMD" == *'glob:"*[task'* ]]; then
+    echo "BLOCKED: Bad glob - brackets [] are character classes"
+    echo "Use: description(substring:\"[task:\") or revset aliases: tasks(), tasks_wip(), etc"
+    exit 1
+fi
+
+# Hint: jj log without limit
+if [[ "$CMD" =~ jj[[:space:]]+log[[:space:]] ]]; then
+    if [[ "$CMD" != *"--limit"* && "$CMD" != *"-n"* && "$CMD" != *"-l"* ]]; then
+        echo "HINT: Add --limit=N to avoid large output"
+        echo "For tasks: jjtask find [-s STATUS]"
+    fi
+fi
+
+# Hint: jj show -> jjtask show-desc
+if [[ "$CMD" =~ jj[[:space:]]+show[[:space:]] ]]; then
+    echo "HINT: For description only: jjtask show-desc REV"
+fi
+
+# Hint: jj rebase/edit for tasks
+if [[ "$CMD" =~ jj[[:space:]]+(rebase|edit)[[:space:]] ]]; then
+    echo "HINT: For tasks use: jjtask wip TASK (start) / jjtask done TASK (complete)"
+fi
+
+# Hint: jj squash -> jjtask squash for merges
+if [[ "$CMD" =~ jj[[:space:]]+squash[[:space:]] ]]; then
+    echo "HINT: For mega-merge flatten: jjtask squash"
+fi
+
+# Hint: jj abandon tasks
+if [[ "$CMD" =~ jj[[:space:]]+abandon[[:space:]] ]]; then
+    echo "HINT: For tasks: jjtask drop TASK --abandon"
+fi
+
+# Hint: jj diff without path
+if [[ "$CMD" =~ jj[[:space:]]+diff($|[[:space:]]) && "$CMD" != *"--"* ]]; then
+    echo "HINT: Filter with filesets: jj diff -- 'glob:src/**/*.go'"
+fi
+
+exit 0

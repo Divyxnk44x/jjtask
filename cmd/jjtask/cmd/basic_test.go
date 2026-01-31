@@ -239,3 +239,51 @@ func TestConfigTaskLogShortDesc(t *testing.T) {
 	}
 
 }
+
+func TestFlagPositionalRev(t *testing.T) {
+	t.Parallel()
+	repo := SetupTestRepo(t)
+
+	repo.Run("jjtask", "create", "Test task")
+	taskID := repo.GetTaskID("todo")
+
+	// Test positional rev: "flag REV STATUS" instead of "flag STATUS --rev REV"
+	repo.Run("jjtask", "flag", taskID, "wip")
+
+	output := repo.Run("jjtask", "find")
+	if !strings.Contains(output, "[task:wip]") {
+		t.Error("wip flag not found after positional rev usage")
+	}
+}
+
+func TestDescTransformPositionalRev(t *testing.T) {
+	t.Parallel()
+	repo := SetupTestRepo(t)
+
+	repo.Run("jjtask", "create", "Original title", "Some context")
+	taskID := repo.GetTaskID("todo")
+
+	// Test positional rev: "desc-transform REV 's/...'" instead of "desc-transform -r REV 's/...'"
+	repo.Run("jjtask", "desc-transform", taskID, "s/Original/Modified/")
+
+	output := repo.Run("jjtask", "show-desc", taskID)
+	if !strings.Contains(output, "Modified title") {
+		t.Errorf("transform with positional rev not applied, got: %s", output)
+	}
+}
+
+func TestDescTransformAlternateDelimiter(t *testing.T) {
+	t.Parallel()
+	repo := SetupTestRepo(t)
+
+	repo.Run("jjtask", "create", "Task with path/in/title", "More context")
+	taskID := repo.GetTaskID("todo")
+
+	// Use | as delimiter to avoid escaping /
+	repo.Run("jjtask", "desc-transform", taskID, "s|path/in/title|new/path|")
+
+	output := repo.Run("jjtask", "show-desc", taskID)
+	if !strings.Contains(output, "new/path") {
+		t.Errorf("alternate delimiter transform failed, got: %s", output)
+	}
+}

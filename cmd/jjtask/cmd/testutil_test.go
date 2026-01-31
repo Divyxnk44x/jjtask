@@ -210,7 +210,7 @@ func (r *TestRepo) GetTaskID(flag string) string {
 }
 
 // RunWithStdin executes a command with input piped to stdin
-func (r *TestRepo) RunWithStdin(input string, name string, args ...string) string {
+func (r *TestRepo) RunWithStdin(input, name string, args ...string) string {
 	r.t.Helper()
 
 	execName := name

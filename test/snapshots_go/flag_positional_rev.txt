@@ -1,0 +1,32 @@
+# before
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask create Test task
+Created new commit kkmpptxz 5785c0b3 (empty) [task:todo] Test task
+Created new commit k (empty) [task:todo] Test task
+
+# after
+○  kkmpptxz [task:todo] Test task
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask flag k wip
+Tip: Consider using 'jjtask wip' or 'jjtask done' for the mega-merge workflow
+
+# after
+○  kkmpptxz [task:wip] Test task
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask find
+○  kkmpptxz [task:wip] Test task
+@  qpvuntsm
+│
+~
+
+# after
+○  kkmpptxz [task:wip] Test task
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+

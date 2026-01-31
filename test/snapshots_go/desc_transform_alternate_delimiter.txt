@@ -1,0 +1,30 @@
+# before
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask create Task with path/in/title More context
+Created new commit kkmpptxz fb2e6102 (empty) [task:todo] Task with path/in/title
+Created new commit k (empty) [task:todo] Task with path/in/title
+
+# after
+○  kkmpptxz [task:todo] Task with path/in/title
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask desc-transform k s|path/in/title|new/path|
+
+# after
+○  kkmpptxz [task:todo] Task with new/path
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+
+$ jjtask show-desc k
+[task:todo] Task with new/path
+
+More context
+
+# after
+○  kkmpptxz [task:todo] Task with new/path
+@  qpvuntsm
+◆  zzzzzzzz root() 00000000
+

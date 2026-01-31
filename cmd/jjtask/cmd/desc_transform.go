@@ -18,7 +18,7 @@ var (
 )
 
 var descTransformCmd = &cobra.Command{
-	Use:   "desc-transform <sed-expr|command...> [--rev REV]",
+	Use:   "desc-transform [REV] <sed-expr|command...>",
 	Short: "Transform revision description",
 	Long: `Transform a revision description through a command or sed expression.
 
@@ -30,6 +30,7 @@ bypassing sed/command execution entirely.
 
 Examples:
   jjtask desc-transform 's/foo/bar/'
+  jjtask desc-transform xqq 's/foo/bar/'             # rev as first arg
   jjtask desc-transform 's/foo/bar\nline2/'          # multiline replacement
   jjtask desc-transform 's/old/new/g'                # global replace
   jjtask desc-transform sed 's/foo/bar/' --rev mxyz  # explicit sed
@@ -38,6 +39,13 @@ Examples:
 	Args: cobra.ArbitraryArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		rev := descTransformRev
+		cmdArgs := args
+
+		// If first arg doesn't look like a sed expr or known command, treat as rev
+		if len(args) > 1 && !isSedExpr(args[0]) && !isKnownTransformCmd(args[0]) {
+			rev = args[0]
+			cmdArgs = args[1:]
+		}
 
 		// Get current description
 		desc, err := client.GetDescription(rev)
@@ -55,13 +63,12 @@ Examples:
 			}
 			newDesc = string(data)
 		} else {
-			if len(args) == 0 {
+			if len(cmdArgs) == 0 {
 				return fmt.Errorf("requires sed expression or command")
 			}
-			cmdArgs := args
 
-			// If single argument starting with s/, use native Go regex
-			if len(cmdArgs) == 1 && strings.HasPrefix(cmdArgs[0], "s/") {
+			// If single argument starting with s/ (or s + delimiter), use native Go regex
+			if len(cmdArgs) == 1 && isSedExpr(cmdArgs[0]) {
 				result, err := applySedExpr(desc, cmdArgs[0])
 				if err != nil {
 					return err
@@ -86,14 +93,37 @@ Examples:
 	},
 }
 
+// isSedExpr checks if a string looks like a sed s/pattern/replacement/ expression
+func isSedExpr(s string) bool {
+	if len(s) < 4 || s[0] != 's' {
+		return false
+	}
+	// s followed by a delimiter (any non-alphanumeric char)
+	delim := s[1]
+	isAlpha := (delim >= 'a' && delim <= 'z') || (delim >= 'A' && delim <= 'Z')
+	isDigit := delim >= '0' && delim <= '9'
+	return !isAlpha && !isDigit
+}
+
+// isKnownTransformCmd checks if arg is a known transform command
+func isKnownTransformCmd(s string) bool {
+	known := []string{"sed", "awk", "perl", "ruby", "python", "python3"}
+	for _, cmd := range known {
+		if s == cmd {
+			return true
+		}
+	}
+	return false
+}
+
 // applySedExpr applies a sed s/pattern/replacement/[flags] expression using Go regex
 func applySedExpr(input, expr string) (string, error) {
-	// Parse s/pattern/replacement/[flags]
-	if !strings.HasPrefix(expr, "s/") {
-		return "", fmt.Errorf("invalid sed expression: must start with s/")
+	// Parse s<delim>pattern<delim>replacement<delim>[flags]
+	if len(expr) < 4 || expr[0] != 's' {
+		return "", fmt.Errorf("invalid sed expression: must start with s<delimiter>")
 	}
 
-	// Find delimiter and parse parts
+	// Find delimiter (char after 's')
 	delim := expr[1]
 	parts := splitSedExpr(expr[2:], delim)
 	if len(parts) < 2 {

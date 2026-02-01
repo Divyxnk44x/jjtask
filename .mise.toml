@@ -13,12 +13,17 @@ description = "Run Go integration tests"
 depends = ["build"]
 run = "go test ./cmd/jjtask/cmd/..."
 
+[tasks."lint:shell"]
+description = "Run shellcheck on shell scripts"
+run = "shellcheck bin/jj claude-plugin/bin/jj-guard"
+
+[tasks."lint:go"]
+description = "Run golangci-lint"
+run = "golangci-lint run"
+
 [tasks.lint]
 description = "Run all linters"
-run = """
-golangci-lint run
-shellcheck bin/jj claude-plugin/bin/jj-guard
-"""
+depends = ["lint:shell", "lint:go"]
 
 [tasks.fmt]
 description = "Format Go code"
@@ -48,6 +53,7 @@ run = "./dev.sh"
 
 [tasks.release]
 description = "Create and push a release tag (patch/minor/major or vX.Y.Z)"
+depends = ["ci"]
 run = """
 #!/usr/bin/env bash
 set -euo pipefail

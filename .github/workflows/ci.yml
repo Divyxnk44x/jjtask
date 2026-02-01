@@ -34,14 +34,8 @@ jobs:
 
       - uses: jdx/mise-action@v3
 
-      - name: Lint Go
+      - name: Lint
         run: mise run lint
-
-      - name: Lint Shell
-        uses: ludeeus/action-shellcheck@master
-        with:
-          scandir: ./bin
-          severity: warning
 
   test:
     runs-on: ubuntu-latest

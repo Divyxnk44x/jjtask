@@ -6,23 +6,27 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	parallelDraft  bool
-	parallelParent string
-)
+var parallelDraft bool
 
 var parallelCmd = &cobra.Command{
-	Use:   "parallel <title1> <title2> [title3...] [--parent REV]",
+	Use:   "parallel [parent] <title1> <title2> [title3...]",
 	Short: "Create sibling tasks under parent",
 	Long: `Create multiple parallel task branches from the same parent.
 
 Examples:
-  jjtask parallel "Widget A" "Widget B" "Widget C"
-  jjtask parallel --draft --parent mxyz "Future A" "Future B"`,
+  jjtask parallel "Task A" "Task B" "Task C"      # siblings under @
+  jjtask parallel xyz "Task A" "Task B"           # siblings under xyz
+  jjtask parallel --draft "Future A" "Future B"   # draft tasks`,
 	Args: cobra.MinimumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		parent := parallelParent
+		parent := "@"
 		titles := args
+
+		// If first arg looks like a rev, treat as parent
+		if len(args) >= 3 && looksLikeRevset(args[0]) {
+			parent = args[0]
+			titles = args[1:]
+		}
 
 		flag := "todo"
 		if parallelDraft {
@@ -43,7 +47,5 @@ Examples:
 
 func init() {
 	parallelCmd.Flags().BoolVar(&parallelDraft, "draft", false, "Create with [task:draft] flag")
-	parallelCmd.Flags().StringVarP(&parallelParent, "parent", "p", "@", "parent revision for all tasks")
 	rootCmd.AddCommand(parallelCmd)
-	_ = parallelCmd.RegisterFlagCompletionFunc("parent", completeRevision)
 }

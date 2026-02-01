@@ -15,7 +15,7 @@ Parent commit (@-)      : qpvuntsm 25687f26 Base commit
 ○  qpvuntsm Base commit
 ◆  zzzzzzzz root() 00000000
 
-$ jjtask create --parent k Task A in chain
+$ jjtask create k Task A in chain
 Created new commit royxmykx a4aff9cc (empty) [task:todo] Task A in chain
 Created new commit r (empty) [task:todo] Task A in chain
 
@@ -60,7 +60,7 @@ Parent commit (@-)      : royxmykx f4fa47a7 [task:wip] Task A in chain
 ○  qpvuntsm Base commit
 ◆  zzzzzzzz root() 00000000
 
-$ jjtask create --parent q Task B sibling
+$ jjtask create q Task B sibling
 Created new commit uyznsvlq 007d5cd6 (empty) [task:todo] Task B sibling
 Created new commit u (empty) [task:todo] Task B sibling
 

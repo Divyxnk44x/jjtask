@@ -28,7 +28,7 @@ Parent commit (@-)      : qpvuntsm e8849ae1 (empty) (no description set)
 ○  qpvuntsm
 ◆  zzzzzzzz root() 00000000
 
-$ jjtask create --parent root() Other task
+$ jjtask create root() Other task
 
 Note: Current revision (k) is a WIP task.
 Consider: `jjtask create "title"` to auto-chain from @

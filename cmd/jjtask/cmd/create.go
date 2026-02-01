@@ -8,9 +8,8 @@ import (
 )
 
 var (
-	createDraft  bool
-	createParent string
-	createChain  bool
+	createDraft bool
+	createChain bool
 )
 
 var createCmd = &cobra.Command{
@@ -33,7 +32,6 @@ Examples:
 
 func init() {
 	createCmd.Flags().BoolVar(&createDraft, "draft", false, "Create with [task:draft] flag")
-	createCmd.Flags().StringVarP(&createParent, "parent", "p", "", "Create as child of REV (default: @)")
 	createCmd.Flags().BoolVar(&createChain, "chain", false, "Auto-chain from deepest pending descendant")
 	rootCmd.AddCommand(createCmd)
 	createCmd.ValidArgsFunction = completeRevision
@@ -62,10 +60,6 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		desc = args[2]
 	}
 
-	// --parent flag overrides positional
-	if createParent != "" {
-		parent = createParent
-	}
 	if parent == "" {
 		parent = "@"
 	}
@@ -116,9 +110,27 @@ func runCreate(cmd *cobra.Command, args []string) error {
 
 // looksLikeRevset returns true if s looks like a jj revision specifier rather than a task title
 func looksLikeRevset(s string) bool {
-	if s == "@" || s == "@-" || strings.HasPrefix(s, "@-") {
+	if s == "" {
+		return false
+	}
+
+	// @ or @- or @-N
+	if s[0] == '@' {
 		return true
 	}
+
+	// Revset operators: ::x, x::, x::y, x+, x-, x..y, etc.
+	for _, op := range []string{"::", "..", "~", "&", "|", "+", "-"} {
+		if strings.Contains(s, op) {
+			return true
+		}
+	}
+
+	// Function calls: root(), ancestors(x), mine(), etc.
+	if strings.Contains(s, "(") && strings.Contains(s, ")") {
+		return true
+	}
+
 	// Short alphanumeric strings (1-12 chars, lowercase letters and numbers only) are likely change IDs
 	if len(s) >= 1 && len(s) <= 12 {
 		for _, c := range s {
@@ -128,6 +140,7 @@ func looksLikeRevset(s string) bool {
 		}
 		return true
 	}
+
 	return false
 }
 

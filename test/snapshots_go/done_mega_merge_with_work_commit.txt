@@ -29,7 +29,7 @@ Parent commit (@-)      : mzvwutvl 52c38bfb Work commit 2
 ○  qpvuntsm Base commit
 ◆  zzzzzzzz root() 00000000
 
-$ jjtask create --parent q Task A
+$ jjtask create q Task A
 Created new commit yostqsxw 4c18dc5c (empty) [task:todo] Task A
 Created new commit y (empty) [task:todo] Task A
 
@@ -42,7 +42,7 @@ Created new commit y (empty) [task:todo] Task A
 ○  qpvuntsm Base commit
 ◆  zzzzzzzz root() 00000000
 
-$ jjtask create --parent q Task B
+$ jjtask create q Task B
 Created new commit wqnwkozp 04e0f2df (empty) [task:todo] Task B
 Created new commit w (empty) [task:todo] Task B
 

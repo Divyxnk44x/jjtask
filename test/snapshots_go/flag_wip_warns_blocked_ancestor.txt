@@ -19,7 +19,7 @@ Tip: Consider using 'jjtask wip' or 'jjtask done' for the mega-merge workflow
 @  qpvuntsm
 ◆  zzzzzzzz root() 00000000
 
-$ jjtask create --parent k Child task
+$ jjtask create k Child task
 Created new commit znkkpsqq 04688420 (empty) [task:todo] Child task
 Created new commit zn (empty) [task:todo] Child task
 

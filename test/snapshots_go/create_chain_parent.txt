@@ -11,7 +11,7 @@ Created new commit k (empty) [task:todo] Parent
 @  qpvuntsm
 ◆  zzzzzzzz root() 00000000
 
-$ jjtask create --chain --parent k Child 1
+$ jjtask create --chain k Child 1
 Created new commit yqosqzyt 9ea530b8 (empty) [task:todo] Child 1
 Created new commit y (empty) [task:todo] Child 1
 
@@ -21,7 +21,7 @@ Created new commit y (empty) [task:todo] Child 1
 @  qpvuntsm
 ◆  zzzzzzzz root() 00000000
 
-$ jjtask create --chain --parent k Child 2
+$ jjtask create --chain k Child 2
 Created new commit znkkpsqq 2013a585 (empty) [task:todo] Child 2
 Created new commit zn (empty) [task:todo] Child 2
 

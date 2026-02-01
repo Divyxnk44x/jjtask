@@ -8,7 +8,7 @@ Parent commit (@-)      : zzzzzzzz 00000000 (empty) (no description set)
 @  qpvuntsm Base
 ◆  zzzzzzzz root() 00000000
 
-$ jjtask create --parent q Task A
+$ jjtask create q Task A
 Created new commit mzvwutvl 7bcc46b5 (empty) [task:todo] Task A
 Created new commit m (empty) [task:todo] Task A
 
@@ -17,7 +17,7 @@ Created new commit m (empty) [task:todo] Task A
 @  qpvuntsm Base
 ◆  zzzzzzzz root() 00000000
 
-$ jjtask create --parent q Task B
+$ jjtask create q Task B
 Created new commit yostqsxw f0a1d0a8 (empty) [task:todo] Task B
 Created new commit y (empty) [task:todo] Task B
 

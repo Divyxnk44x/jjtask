@@ -35,22 +35,22 @@ type FindOutput struct {
 var findRevset string
 
 var findCmd = &cobra.Command{
-	Use:   "find [--status STATUS] [--revisions REVSET]",
+	Use:   "find [--status STATUS] [--revset REVSET]",
 	Short: "List tasks",
 	Long: `List tasks matching a status filter or custom revset.
 
 Without arguments, shows pending tasks. With --status, shows tasks
-matching that status. Use -r for custom revsets.
+matching that status. Use --revset for custom filtering.
 
 Status options: pending, todo, wip, done, blocked, standby, untested, draft, review, all
 
 Examples:
-  jjtask find                    # pending tasks (default)
-  jjtask find --status todo      # todo tasks only
-  jjtask find -s wip             # work in progress
-  jjtask find -s done            # completed tasks
-  jjtask find -s all             # all tasks including done
-  jjtask find -r 'tasks() & mine()'`,
+  jjtask find                        # pending tasks (default)
+  jjtask find --status todo          # todo tasks only
+  jjtask find -s wip                 # work in progress
+  jjtask find -s done                # completed tasks
+  jjtask find -s all                 # all tasks including done
+  jjtask find --revset 'tasks() & mine()'`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var revset string
@@ -171,7 +171,7 @@ func PrintTasksWithRevset(repos []workspace.Repo, workspaceRoot, revset string) 
 
 func init() {
 	findCmd.Flags().StringVarP(&findStatus, "status", "s", "", "Filter by status (pending, todo, wip, done, blocked, standby, untested, draft, review, all)")
-	findCmd.Flags().StringVarP(&findRevset, "revisions", "r", "", "Custom revset to filter tasks")
+	findCmd.Flags().StringVarP(&findRevset, "revset", "r", "", "Custom revset to filter tasks")
 	findCmd.Flags().StringVar(&findFormat, "format", "text", "Output format: text or json")
 	rootCmd.AddCommand(findCmd)
 	_ = findCmd.RegisterFlagCompletionFunc("status", completeFindFlag)

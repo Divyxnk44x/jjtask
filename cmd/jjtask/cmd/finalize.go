@@ -15,12 +15,12 @@ var finalizeCmd = &cobra.Command{
 	Short: "Strip [task:*] prefix from commits",
 	Long: `Remove [task:*] prefix from commit descriptions for clean history.
 
-By default operates on @. Use -r for a revset to finalize multiple commits.
+By default operates on @. Use --revset for multiple commits.
 
 Examples:
-  jjtask finalize           # Strip prefix from @
-  jjtask finalize abc123    # Strip from specific revision
-  jjtask finalize -r '@-::@' # Strip from range`,
+  jjtask finalize              # Strip prefix from @
+  jjtask finalize abc123       # Strip from specific revision
+  jjtask finalize --revset '@-::@'  # Strip from range`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		revset := "@"
@@ -83,6 +83,6 @@ Examples:
 
 func init() {
 	rootCmd.AddCommand(finalizeCmd)
-	finalizeCmd.Flags().StringVarP(&finalizeRevset, "revisions", "r", "", "Revset to finalize")
-	_ = finalizeCmd.RegisterFlagCompletionFunc("revisions", completeRevision)
+	finalizeCmd.Flags().StringVarP(&finalizeRevset, "revset", "r", "", "Revset to finalize (for multiple commits)")
+	_ = finalizeCmd.RegisterFlagCompletionFunc("revset", completeRevision)
 }

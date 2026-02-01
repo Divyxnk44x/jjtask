@@ -40,7 +40,7 @@ func TestWipMultipleTasks(t *testing.T) {
 	taskA := repo.GetTaskID("todo")
 
 	// Create second task as sibling (not child)
-	repo.Run("jjtask", "create", "--parent", "root()", "Task B")
+	repo.Run("jjtask", "create", "root()", "Task B")
 	taskB := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task B")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
@@ -164,7 +164,7 @@ func TestDoneLinearizesFromMerge(t *testing.T) {
 	// Create Task B as sibling of Task A (also child of base)
 	baseID := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `description(substring:"Base commit")`,
 		"--no-graph", "-T", "change_id.shortest()"))
-	repo.Run("jjtask", "create", "--parent", baseID, "Task B")
+	repo.Run("jjtask", "create", baseID, "Task B")
 	taskB := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task B")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
@@ -221,7 +221,7 @@ func TestSquashFlatten(t *testing.T) {
 	// Create Task B as sibling (same parent as Task A)
 	baseID := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `description(substring:"Base commit")`,
 		"--no-graph", "-T", "change_id.shortest()"))
-	repo.Run("jjtask", "create", "--parent", baseID, "Task B")
+	repo.Run("jjtask", "create", baseID, "Task B")
 	taskB := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task B")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
@@ -329,15 +329,15 @@ func TestWipMultipleRevsAtOnce(t *testing.T) {
 	repo.Run("jj", "describe", "-m", "Base")
 	baseID := strings.TrimSpace(repo.runSilent("jj", "log", "-r", "@", "--no-graph", "-T", "change_id.shortest()"))
 
-	repo.Run("jjtask", "create", "--parent", baseID, "Task A")
+	repo.Run("jjtask", "create", baseID, "Task A")
 	taskA := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task A")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
-	repo.Run("jjtask", "create", "--parent", baseID, "Task B")
+	repo.Run("jjtask", "create", baseID, "Task B")
 	taskB := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task B")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
-	repo.Run("jjtask", "create", "--parent", baseID, "Task C")
+	repo.Run("jjtask", "create", baseID, "Task C")
 	taskC := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task C")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
@@ -403,11 +403,11 @@ func TestDropMultipleRevsAtOnce(t *testing.T) {
 	repo.Run("jj", "describe", "-m", "Base")
 	baseID := strings.TrimSpace(repo.runSilent("jj", "log", "-r", "@", "--no-graph", "-T", "change_id.shortest()"))
 
-	repo.Run("jjtask", "create", "--parent", baseID, "Task A")
+	repo.Run("jjtask", "create", baseID, "Task A")
 	taskA := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task A")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
-	repo.Run("jjtask", "create", "--parent", baseID, "Task B")
+	repo.Run("jjtask", "create", baseID, "Task B")
 	taskB := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task B")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
@@ -435,15 +435,15 @@ func TestDoneThreeWayMergeLinearizes(t *testing.T) {
 	repo.Run("jj", "describe", "-m", "Base")
 	baseID := strings.TrimSpace(repo.runSilent("jj", "log", "-r", "@", "--no-graph", "-T", "change_id.shortest()"))
 
-	repo.Run("jjtask", "create", "--parent", baseID, "Task A")
+	repo.Run("jjtask", "create", baseID, "Task A")
 	taskA := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task A")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
-	repo.Run("jjtask", "create", "--parent", baseID, "Task B")
+	repo.Run("jjtask", "create", baseID, "Task B")
 	taskB := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task B")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
-	repo.Run("jjtask", "create", "--parent", baseID, "Task C")
+	repo.Run("jjtask", "create", baseID, "Task C")
 	taskC := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task C")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
@@ -496,7 +496,7 @@ func TestWipPreservesAtContent(t *testing.T) {
 	// Create a task as sibling
 	baseID := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `description(substring:"Base")`,
 		"--no-graph", "-T", "change_id.shortest()"))
-	repo.Run("jjtask", "create", "--parent", baseID, "Task")
+	repo.Run("jjtask", "create", baseID, "Task")
 	taskID := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks()`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
@@ -520,11 +520,11 @@ func TestDropPreservesAtContent(t *testing.T) {
 	baseID := strings.TrimSpace(repo.runSilent("jj", "log", "-r", "@", "--no-graph", "-T", "change_id.shortest()"))
 
 	// Create two tasks
-	repo.Run("jjtask", "create", "--parent", baseID, "Task A")
+	repo.Run("jjtask", "create", baseID, "Task A")
 	taskA := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task A")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
-	repo.Run("jjtask", "create", "--parent", baseID, "Task B")
+	repo.Run("jjtask", "create", baseID, "Task B")
 	taskB := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task B")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
@@ -654,11 +654,11 @@ func TestDoneMegaMergeWithWorkCommit(t *testing.T) {
 	work3ID := strings.TrimSpace(repo.runSilent("jj", "log", "-r", "@", "--no-graph", "-T", "change_id.shortest()"))
 
 	// Create task commits as siblings of work branch (children of base)
-	repo.Run("jjtask", "create", "--parent", baseID, "Task A")
+	repo.Run("jjtask", "create", baseID, "Task A")
 	taskA := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task A")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
-	repo.Run("jjtask", "create", "--parent", baseID, "Task B")
+	repo.Run("jjtask", "create", baseID, "Task B")
 	taskB := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task B")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
@@ -754,7 +754,7 @@ func TestDoneMegaMergeWithTaskContent(t *testing.T) {
 	work2ID := strings.TrimSpace(repo.runSilent("jj", "log", "-r", "@", "--no-graph", "-T", "change_id.shortest()"))
 
 	// Create task with content as sibling of work branch
-	repo.Run("jjtask", "create", "--parent", baseID, "Task A with content")
+	repo.Run("jjtask", "create", baseID, "Task A with content")
 	taskA := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task A")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 
@@ -838,7 +838,7 @@ func TestDoneMegaMergeWithTaskInWorkChain(t *testing.T) {
 	work1ID := strings.TrimSpace(repo.runSilent("jj", "log", "-r", "@", "--no-graph", "-T", "change_id.shortest()"))
 
 	// Create Task A with content as child of work1
-	repo.Run("jjtask", "create", "--parent", work1ID, "Task A in chain")
+	repo.Run("jjtask", "create", work1ID, "Task A in chain")
 	taskA := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task A")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 	repo.Run("jj", "edit", taskA)
@@ -853,7 +853,7 @@ func TestDoneMegaMergeWithTaskInWorkChain(t *testing.T) {
 	// Create Task B as sibling of work2 (child of base)
 	baseID := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `description(substring:"Base commit")`,
 		"--no-graph", "-T", "change_id.shortest()"))
-	repo.Run("jjtask", "create", "--parent", baseID, "Task B sibling")
+	repo.Run("jjtask", "create", baseID, "Task B sibling")
 	taskB := strings.TrimSpace(repo.runSilent("jj", "log", "-r", `tasks() & description(substring:"Task B")`,
 		"--no-graph", "-T", "change_id.shortest()"))
 	repo.Run("jj", "edit", taskB)

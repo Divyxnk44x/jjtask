@@ -11,7 +11,7 @@ Created new commit k (empty) [task:todo] Task A
 @  qpvuntsm
 ◆  zzzzzzzz root() 00000000
 
-$ jjtask create --parent @ Task B
+$ jjtask create @ Task B
 Created new commit royxmykx 529cd844 (empty) [task:todo] Task B
 Created new commit r (empty) [task:todo] Task B
 

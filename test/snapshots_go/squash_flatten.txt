@@ -34,7 +34,7 @@ Parent commit (@-): qpvuntsm 25687f26 Base commit
 ○  qpvuntsm Base commit
 ◆  zzzzzzzz root() 00000000
 
-$ jjtask create --parent q Task B
+$ jjtask create q Task B
 Created new commit kpqxywon b297fedb (empty) [task:todo] Task B
 Created new commit k (empty) [task:todo] Task B
 

@@ -22,7 +22,7 @@ Parent commit (@-)      : zsuskuln fcda8548 Work commit 1
 ○  qpvuntsm Base commit
 ◆  zzzzzzzz root() 00000000
 
-$ jjtask create --parent q Task A with content
+$ jjtask create q Task A with content
 Created new commit vruxwmqv 8ed16230 (empty) [task:todo] Task A with content
 Created new commit v (empty) [task:todo] Task A with content
 

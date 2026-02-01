@@ -82,7 +82,7 @@ func TestFlagDoneWarnsPendingChildren(t *testing.T) {
 
 	repo.Run("jjtask", "create", "Parent task")
 	parentID := repo.GetTaskID("todo")
-	repo.Run("jjtask", "create", "--parent", parentID, "Child task")
+	repo.Run("jjtask", "create", parentID, "Child task")
 
 	output := repo.Run("jjtask", "flag", "done", "--rev", parentID)
 
@@ -101,7 +101,7 @@ func TestFlagDoneNoWarningChildrenDone(t *testing.T) {
 
 	repo.Run("jjtask", "create", "Parent task")
 	parentID := repo.GetTaskID("todo")
-	repo.Run("jjtask", "create", "--parent", parentID, "Child task")
+	repo.Run("jjtask", "create", parentID, "Child task")
 
 	// Mark child done first
 	output := repo.Run("jj", "log", "-r", "children("+parentID+") & tasks()",
@@ -124,7 +124,7 @@ func TestFlagWipWarnsBlockedAncestor(t *testing.T) {
 	repo.Run("jjtask", "create", "Parent task")
 	parentID := repo.GetTaskID("todo")
 	repo.Run("jjtask", "flag", "blocked", "--rev", parentID)
-	repo.Run("jjtask", "create", "--parent", parentID, "Child task")
+	repo.Run("jjtask", "create", parentID, "Child task")
 
 	// Find child
 	output := repo.Run("jj", "log", "-r", "children("+parentID+") & tasks()",
@@ -145,7 +145,7 @@ func TestFlagWipNoWarningNotBlocked(t *testing.T) {
 
 	repo.Run("jjtask", "create", "Parent task")
 	parentID := repo.GetTaskID("todo")
-	repo.Run("jjtask", "create", "--parent", parentID, "Child task")
+	repo.Run("jjtask", "create", parentID, "Child task")
 
 	// Find child
 	output := repo.Run("jj", "log", "-r", "children("+parentID+") & tasks()",
@@ -165,7 +165,7 @@ func TestFlagWipWarnsExistingWip(t *testing.T) {
 	repo := SetupTestRepo(t)
 
 	repo.Run("jjtask", "create", "Task A")
-	repo.Run("jjtask", "create", "--parent", "@", "Task B")
+	repo.Run("jjtask", "create", "@", "Task B")
 
 	// Find both tasks
 	taskA := repo.Run("jj", "log", "-r", "tasks() & description(substring:\"Task A\")",
@@ -193,7 +193,7 @@ func TestFlagWipNoWarningSameChain(t *testing.T) {
 
 	repo.Run("jjtask", "create", "Parent task")
 	parentID := repo.GetTaskID("todo")
-	repo.Run("jjtask", "create", "--parent", parentID, "Child task")
+	repo.Run("jjtask", "create", parentID, "Child task")
 
 	// Find child
 	childOutput := repo.Run("jj", "log", "-r", "children("+parentID+") & tasks()",
@@ -218,7 +218,7 @@ func TestFlagWipWarnsDoneAncestor(t *testing.T) {
 
 	repo.Run("jjtask", "create", "Parent task")
 	parentID := repo.GetTaskID("todo")
-	repo.Run("jjtask", "create", "--parent", parentID, "Child task")
+	repo.Run("jjtask", "create", parentID, "Child task")
 
 	// Find child
 	output := repo.Run("jj", "log", "-r", "children("+parentID+") & tasks()",

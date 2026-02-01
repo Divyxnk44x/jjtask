@@ -15,7 +15,7 @@ func TestCreateSuggestsChainingWhenWip(t *testing.T) {
 	repo.Run("jj", "edit", wipID)
 
 	// Create task with different parent
-	output := repo.Run("jjtask", "create", "--parent", "root()", "Other task")
+	output := repo.Run("jjtask", "create", "root()", "Other task")
 
 	if !strings.Contains(output, "is a WIP task") {
 		t.Error("expected WIP suggestion")
@@ -79,8 +79,8 @@ func TestCreateChainParent(t *testing.T) {
 	repo.Run("jjtask", "create", "Parent")
 	parentID := repo.GetTaskID("todo")
 
-	repo.Run("jjtask", "create", "--chain", "--parent", parentID, "Child 1")
-	repo.Run("jjtask", "create", "--chain", "--parent", parentID, "Child 2")
+	repo.Run("jjtask", "create", "--chain", parentID, "Child 1")
+	repo.Run("jjtask", "create", "--chain", parentID, "Child 2")
 
 	// Child 2 should be child of Child 1, not sibling
 	child2Parent := repo.Run("jj", "log",
@@ -100,8 +100,8 @@ func TestCreateDefaultDirect(t *testing.T) {
 	repo.Run("jjtask", "create", "Parent")
 	parentID := repo.GetTaskID("todo")
 
-	repo.Run("jjtask", "create", "--parent", parentID, "Child 1")
-	repo.Run("jjtask", "create", "--parent", parentID, "Child 2")
+	repo.Run("jjtask", "create", parentID, "Child 1")
+	repo.Run("jjtask", "create", parentID, "Child 2")
 
 	// Child 2 should be sibling of Child 1 (both direct children of parent)
 	child2Parent := repo.Run("jj", "log",
@@ -133,6 +133,6 @@ func TestCreateWipSuggestionSnapshot(t *testing.T) {
 	repo.Run("jj", "edit", wipID)
 
 	// Create task with different parent - capture suggestion message format
-	repo.Run("jjtask", "create", "--parent", "root()", "Other task")
+	repo.Run("jjtask", "create", "root()", "Other task")
 
 }

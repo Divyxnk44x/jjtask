@@ -1,5 +1,5 @@
 ---
-meprintCompactTasksdescription: Remove tasks from @ merge without marking done
+description: Remove tasks from @ merge without marking done
 argument-hint: <tasks...> [--abandon]
 allowed-tools:
  - Bash

